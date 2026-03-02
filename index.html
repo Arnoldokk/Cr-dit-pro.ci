@@ -1231,7 +1231,7 @@ function draw(p){
 function clearSig(){if(ctx){ctx.clearRect(0,0,canvas.width,canvas.height);}sigHasContent=false;}
 
 // ── VALIDATION ENGAGEMENT ──
-function validerEngagement(){
+async function validerEngagement(){
   const nom=document.getElementById('eg-nom').value.trim();
   const tel=document.getElementById('eg-tel').value.trim();
   const quartier=document.getElementById('eg-quartier').value.trim();
@@ -1247,8 +1247,32 @@ function validerEngagement(){
   if(!sigHasContent) return alert('⚠️ Signe dans le cadre prévu avant de valider.');
 
   const num='CP-2026-'+String(Math.floor(Math.random()*9000)+1000);
-  document.getElementById('dossier-num').textContent='N° DOSSIER : '+num;
+  const d=resultData;
+  const mens=d.montant&&d.duree?Math.round(getMens(d.montant,d.duree,0.12)):0;
 
+  // Envoi Formspree
+  try {
+    await fetch('https://formspree.io/f/mykdaqay',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        '📋 Numéro Dossier': num,
+        '👤 Nom complet': nom,
+        '📱 Téléphone WhatsApp': tel,
+        '📍 Quartier': quartier,
+        '💼 Profession': profession,
+        '🎯 Projet': projet,
+        '💰 Montant demandé': d.montant?fmt(d.montant):'—',
+        '📅 Durée': d.duree?d.duree+' mois':'—',
+        '💵 Mensualité estimée': mens?fmt(mens):'—',
+        '📊 Revenu mensuel': d.rev?fmt(d.rev):'—',
+        '🧾 Dépenses mensuelles': d.dep?fmt(d.dep):'—',
+        '📈 Type de profil': isComm?'Commerçant / Indépendant':'Salarié',
+      })
+    });
+  } catch(e){ console.log('Formspree error',e); }
+
+  document.getElementById('dossier-num').textContent='N° DOSSIER : '+num;
   const conf=document.getElementById('confirmation');
   conf.style.display='block';
   void conf.offsetWidth;
