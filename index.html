@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CréditPro CI — Votre Courtier de Confiance</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C9A84C;
+  --gold2:#F0C97A;
+  --gold-glow:rgba(201,168,76,0.18);
+  --navy:#04101E;
+  --navy2:#071628;
+  --navy3:#0C2038;
+  --card:rgba(255,255,255,0.035);
+  --card-border:rgba(255,255,255,0.07);
+  --text:#EEF2F7;
+  --muted:#6A8DAA;
+  --green:#22C55E;
+  --red:#EF4444;
+  --yellow:#EAB308;
+  --accent:#1E90FF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--navy);color:var(--text);
+  min-height:100vh;overflow-x:hidden;
+}
+/* BG */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%,rgba(201,168,76,0.07),transparent 60%),
+    radial-gradient(ellipse 40% 60% at 100% 80%,rgba(30,144,255,0.04),transparent 60%);
+}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:#04101E;}
+::-webkit-scrollbar-thumb{background:#C9A84C44;border-radius:4px;}
+
+/* ══ HEADER ══ */
+header{
+  position:sticky;top:0;z-index:200;
+  background:rgba(4,16,30,0.92);
+  backdrop-filter:blur(20px) saturate(1.4);
+  border-bottom:1px solid rgba(201,168,76,0.12);
+  padding:0 40px;height:70px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo-block{display:flex;align-items:center;gap:12px;}
+.logo-icon{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;
+  box-shadow:0 0 20px rgba(201,168,76,0.3);
+}
+.logo-text{font-size:1.2rem;font-weight:900;letter-spacing:-0.02em;}
+.logo-text span{color:var(--gold);}
+.logo-tagline{font-size:0.65rem;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-top:-1px;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.badge-courtier{
+  padding:6px 16px;border-radius:20px;
+  background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));
+  border:1px solid rgba(201,168,76,0.3);
+  font-size:0.7rem;font-weight:800;letter-spacing:0.08em;
+  color:var(--gold);text-transform:uppercase;
+}
+.header-step-indicator{display:flex;align-items:center;gap:6px;}
+.hstep{
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.7rem;font-weight:800;color:var(--muted);
+  transition:all 0.3s;
+}
+.hstep.done{background:rgba(34,197,94,0.15);border-color:var(--green);color:var(--green);}
+.hstep.active{background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold);}
+.hstep-line{width:20px;height:2px;background:rgba(255,255,255,0.08);}
+
+/* ══ HERO ══ */
+.hero-section{
+  padding:70px 40px 50px;
+  max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center;
+}
+@media(max-width:750px){.hero-section{grid-template-columns:1fr;padding:40px 20px 30px;gap:30px;}}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 14px;border-radius:20px;
+  background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);
+  font-size:0.72rem;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:20px;
+}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.hero h1{
+  font-size:clamp(2.2rem,4vw,3.4rem);
+  font-weight:900;line-height:1.08;
+  letter-spacing:-0.03em;margin-bottom:18px;
+}
+.hero h1 em{
+  color:transparent;font-style:normal;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;background-clip:text;
+}
+.hero p{color:var(--muted);font-size:1rem;line-height:1.7;max-width:440px;}
+.hero-stats{
+  display:flex;gap:24px;margin-top:32px;flex-wrap:wrap;
+}
+.hstat{text-align:center;}
+.hstat .hn{font-size:1.6rem;font-weight:900;color:var(--gold);letter-spacing:-0.02em;}
+.hstat .hl{font-size:0.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;}
+.hero-card{
+  background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(4,16,30,0.9));
+  border:1px solid rgba(201,168,76,0.2);
+  border-radius:24px;padding:32px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4),0 0 0 1px rgba(201,168,76,0.05) inset;
+}
+.hc-title{font-size:0.75rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:18px;}
+.process-step{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;}
+.process-step:last-child{margin-bottom:0;}
+.ps-num{
+  width:32px;height:32px;min-width:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#04101E;font-weight:900;font-size:0.8rem;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(201,168,76,0.3);
+}
+.ps-body .ps-t{font-weight:800;font-size:0.88rem;margin-bottom:2px;}
+.ps-body .ps-d{font-size:0.78rem;color:var(--muted);line-height:1.5;}
+
+/* ══ WRAPPER PRINCIPAL ══ */
+.main-wrap{max-width:1100px;margin:0 auto;padding:0 40px 80px;}
+@media(max-width:750px){.main-wrap{padding:0 16px 60px;}}
+
+/* ══ STEPS ══ */
+.step-header{
+  display:flex;align-items:center;gap:14px;margin-bottom:28px;
+  padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.step-badge{
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.05));
+  border:1.5px solid rgba(201,168,76,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;
+}
+.step-hd-text .step-num{font-size:0.68rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;}
+.step-hd-text h2{font-size:1.15rem;font-weight:800;color:var(--text);margin-top:1px;}
+
+/* ══ CARDS ══ */
+.card{
+  background:var(--card);
+  border:1px solid var(--card-border);
+  border-radius:20px;padding:28px;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,168,76,0.15),transparent);
+}
+.card-title{
+  font-size:0.78rem;font-weight:800;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.07em;margin-bottom:20px;
+  display:flex;align-items:center;gap:8px;
+}
+.ct-ico{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:0.88rem;
+}
+.ct-ico.gold{background:rgba(201,168,76,0.15);}
+.ct-ico.green{background:rgba(34,197,94,0.12);}
+.ct-ico.blue{background:rgba(30,144,255,0.12);}
+
+/* ══ GRIDS ══ */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.full{grid-column:1/-1;}
+@media(max-width:680px){.grid2{grid-template-columns:1fr;}.grid3{grid-template-columns:1fr 1fr;}}
+@media(max-width:420px){.grid3{grid-template-columns:1fr;}}
+
+/* ══ FIELDS ══ */
+.field{margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+label.lbl{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:0.72rem;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.05em;margin-bottom:7px;
+}
+label.lbl .hint{
+  font-weight:500;text-transform:none;letter-spacing:0;
+  color:rgba(106,141,170,0.6);font-size:0.68rem;
+}
+.inp-wrap{position:relative;}
+.inp-pfx{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  font-size:0.68rem;font-weight:800;color:var(--gold);pointer-events:none;
+}
+input[type=number],input[type=text],input[type=email],input[type=tel],select,textarea{
+  width:100%;background:rgba(4,16,30,0.8);
+  border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;
+  padding:13px 14px 13px 60px;color:#fff;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:0.95rem;font-weight:600;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+  -moz-appearance:textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(201,168,76,0.5);
+  box-shadow:0 0 0 3px rgba(201,168,76,0.08);
+}
+input.no-pfx,select.no-pfx,textarea.no-pfx{padding-left:14px;}
+select{cursor:pointer;}
+select option{background:#071628;}
+textarea{resize:vertical;min-height:90px;}
+
+/* ══ MODE SWITCH ══ */
+.mode-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;}
+.mbtn{
+  display:flex;align-items:center;gap:14px;
+  padding:18px 20px;border-radius:16px;cursor:pointer;
+  border:2px solid rgba(255,255,255,0.07);
+  background:rgba(255,255,255,0.02);transition:all 0.25s;
+}
+.mbtn:hover{border-color:rgba(201,168,76,0.3);}
+.mbtn.active{
+  border-color:var(--gold);
+  background:rgba(201,168,76,0.07);
+}
+.mbtn-ico{font-size:1.8rem;width:44px;text-align:center;flex-shrink:0;}
+.mbtn-txt .mt{font-size:0.92rem;font-weight:800;color:var(--text);}
+.mbtn-txt .md{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+.mbtn.active .mt{color:var(--gold);}
+
+/* ══ DURÉE PILLS ══ */
+.dur-row{display:flex;gap:8px;flex-wrap:wrap;}
+.dpill{
+  padding:10px 20px;border-radius:30px;cursor:pointer;
+  border:1.5px solid rgba(255,255,255,0.09);
+  color:var(--muted);font-weight:800;font-size:0.85rem;
+  transition:all 0.2s;white-space:nowrap;
+}
+.dpill:hover{border-color:rgba(201,168,76,0.4);color:var(--text);}
+.dpill.on{background:rgba(201,168,76,0.12);border-color:var(--gold);color:var(--gold);}
+
+/* ══ DEP ROWS ══ */
+.dep-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.dep-row:last-child{margin-bottom:0;}
+.dep-ico{font-size:1rem;width:24px;text-align:center;flex-shrink:0;}
+.dep-lbl{font-size:0.8rem;font-weight:700;color:var(--text);min-width:130px;}
+.dep-row .inp-wrap{flex:1;}
+.dep-row input{font-size:0.85rem;padding:10px 14px 10px 52px;}
+
+/* ══ REV SOURCES ══ */
+.rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.rev-src{
+  background:rgba(4,16,30,0.6);border:1.5px solid rgba(255,255,255,0.06);
+  border-radius:14px;padding:14px;transition:border-color 0.2s;
+}
+.rev-src:focus-within{border-color:rgba(201,168,76,0.4);}
+.rs-hd{display:flex;align-items:center;gap:7px;margin-bottom:10px;}
+.rs-hd .ico{font-size:1rem;}
+.rs-hd span{font-size:0.75rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;}
+.rev-src input{font-size:0.85rem;padding:10px 14px 10px 50px;}
+.rev-src .inp-pfx{font-size:0.65rem;}
+
+/* Mois variable */
+.ptabs{display:flex;gap:6px;margin-bottom:14px;}
+.ptab{
+  padding:6px 14px;border-radius:20px;font-size:0.75rem;font-weight:800;
+  border:1.5px solid rgba(255,255,255,0.09);color:var(--muted);
+  cursor:pointer;transition:all 0.2s;
+}
+.ptab.on{background:rgba(201,168,76,0.12);border-color:var(--gold);color:var(--gold);}
+.mois-manual{display:none;}
+.mois-manual.show{display:block;}
+.mois-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.mbox{
+  border-radius:12px;padding:12px;text-align:center;border:1.5px solid;
+}
+.mbox.bad{border-color:rgba(239,68,68,0.25);background:rgba(239,68,68,0.04);}
+.mbox.ok{border-color:rgba(234,179,8,0.25);background:rgba(234,179,8,0.04);}
+.mbox.good{border-color:rgba(34,197,94,0.25);background:rgba(34,197,94,0.04);}
+.mlabel{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;}
+.mbox.bad .mlabel{color:var(--red);}
+.mbox.ok .mlabel{color:var(--yellow);}
+.mbox.good .mlabel{color:var(--green);}
+.mbox input{font-size:0.82rem;padding:9px 14px 9px 48px;}
+.rev-auto{
+  background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);
+  border-radius:12px;padding:12px 16px;font-size:0.82rem;color:var(--muted);
+  margin-top:6px;
+}
+
+/* ══ CTA PRIMAIRE ══ */
+.btn-primary{
+  width:100%;padding:17px;
+  background:linear-gradient(135deg,#B8922A 0%,var(--gold) 45%,var(--gold2) 100%);
+  border:none;border-radius:14px;color:#04101E;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:1rem;font-weight:900;cursor:pointer;
+  box-shadow:0 6px 30px rgba(201,168,76,0.35);
+  letter-spacing:0.01em;transition:transform 0.2s,box-shadow 0.2s;
+  position:relative;overflow:hidden;
+}
+.btn-primary::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,0.12),transparent);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(201,168,76,0.5);}
+.btn-primary:active{transform:translateY(0);}
+
+/* ══ SECTION SEPARATOR ══ */
+.sep{
+  display:flex;align-items:center;gap:14px;margin:36px 0;
+}
+.sep-line{flex:1;height:1px;background:rgba(255,255,255,0.05);}
+.sep-label{font-size:0.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;}
+
+/* ══════════════════════════════
+   RÉSULTATS
+══════════════════════════════ */
+#results{display:none;padding-top:20px;}
+#results.show{display:block;animation:fadeUp 0.5s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+
+/* VERDICT */
+.verdict-bar{
+  display:flex;align-items:center;gap:20px;
+  padding:24px 28px;border-radius:20px;border:1.5px solid;
+  margin-bottom:20px;position:relative;overflow:hidden;
+}
+.verdict-bar::before{
+  content:'';position:absolute;inset:0;opacity:0.04;
+  background:radial-gradient(ellipse at 0% 0%,currentColor,transparent 70%);
+}
+.verdict-bar.green{border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);}
+.verdict-bar.yellow{border-color:rgba(234,179,8,0.4);background:rgba(234,179,8,0.05);}
+.verdict-bar.red{border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.06);}
+.verd-emo{font-size:3rem;line-height:1;flex-shrink:0;}
+.verd-txt h2{font-size:1.3rem;font-weight:900;margin-bottom:4px;}
+.verdict-bar.green .verd-txt h2{color:var(--green);}
+.verdict-bar.yellow .verd-txt h2{color:var(--yellow);}
+.verdict-bar.red .verd-txt h2{color:var(--red);}
+.verd-txt p{font-size:0.88rem;color:var(--muted);line-height:1.55;}
+.verd-right{margin-left:auto;text-align:right;flex-shrink:0;}
+.verd-right .vr-val{font-size:1.8rem;font-weight:900;font-variant-numeric:tabular-nums;}
+.verd-right .vr-lbl{font-size:0.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;}
+.verdict-bar.green .vr-val{color:var(--green);}
+.verdict-bar.yellow .vr-val{color:var(--yellow);}
+.verdict-bar.red .vr-val{color:var(--red);}
+
+/* SCENARIO TABS */
+.sc-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.sctab{
+  display:flex;align-items:center;gap:7px;
+  padding:9px 18px;border-radius:30px;border:1.5px solid;
+  cursor:pointer;font-weight:800;font-size:0.82rem;transition:all 0.2s;
+}
+.sctab.p{border-color:rgba(239,68,68,0.3);color:rgba(239,68,68,0.6);}
+.sctab.r{border-color:rgba(234,179,8,0.3);color:rgba(234,179,8,0.6);}
+.sctab.o{border-color:rgba(34,197,94,0.3);color:rgba(34,197,94,0.6);}
+.sctab.p.on{background:rgba(239,68,68,0.1);border-color:var(--red);color:var(--red);}
+.sctab.r.on{background:rgba(234,179,8,0.08);border-color:var(--yellow);color:var(--yellow);}
+.sctab.o.on{background:rgba(34,197,94,0.08);border-color:var(--green);color:var(--green);}
+.sctab-dot{width:8px;height:8px;border-radius:50%;background:currentColor;}
+
+/* STATS BOX */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+@media(max-width:600px){.stats-grid{grid-template-columns:1fr 1fr;}}
+.sbox{
+  background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;padding:16px 14px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.sbox::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,currentColor,transparent);
+  opacity:0.2;
+}
+.sv{font-size:1.1rem;font-weight:900;margin-bottom:4px;font-variant-numeric:tabular-nums;}
+.sl{font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;}
+.sv.g{color:var(--green);}
+.sv.r{color:var(--red);}
+.sv.y{color:var(--yellow);}
+.sv.gold{color:var(--gold);}
+.sv.w{color:#fff;}
+
+/* GAUGE */
+.gauge-wrap{margin:6px 0 4px;}
+.gauge-hd{display:flex;justify-content:space-between;font-size:0.78rem;font-weight:700;margin-bottom:7px;}
+.gauge-track{height:12px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;position:relative;}
+.gauge-fill{height:100%;border-radius:6px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.gauge-zones{display:flex;position:absolute;inset:0;opacity:0.15;}
+.gz-green{flex:0 0 30%;background:var(--green);}
+.gz-yellow{flex:0 0 10%;background:var(--yellow);}
+.gz-red{flex:1;background:var(--red);}
+.gauge-ticks{display:flex;justify-content:space-between;font-size:0.62rem;color:var(--muted);margin-top:4px;}
+
+/* BUDGET BAR */
+.bbar{height:28px;border-radius:8px;overflow:hidden;display:flex;margin:10px 0 8px;}
+.bb-seg{
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.63rem;font-weight:800;color:#fff;
+  transition:width 1s cubic-bezier(.4,0,.2,1);overflow:hidden;padding:0 4px;min-width:0;
+}
+.bb-seg.c{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.bb-seg.d{background:rgba(60,80,110,0.9);}
+.bb-seg.l{background:rgba(34,197,94,0.5);}
+.bleg{display:flex;gap:14px;flex-wrap:wrap;}
+.bl-item{display:flex;align-items:center;gap:6px;font-size:0.7rem;color:var(--muted);}
+.bl-dot{width:10px;height:10px;border-radius:3px;}
+
+/* EXPLAIN */
+.explain-box{
+  background:rgba(201,168,76,0.05);
+  border:1px solid rgba(201,168,76,0.15);
+  border-radius:14px;padding:18px;margin-bottom:14px;
+}
+.explain-box h4{font-size:0.8rem;font-weight:800;color:var(--gold);margin-bottom:10px;letter-spacing:0.02em;}
+.explain-box p{font-size:0.87rem;line-height:1.8;color:var(--text);}
+.explain-box strong{color:var(--gold2);}
+
+/* CONSEILS */
+.clist{list-style:none;}
+.ci{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.ci:last-child{border:none;}
+.cico{
+  width:30px;height:30px;min-width:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:0.9rem;
+}
+.cico.ok{background:rgba(34,197,94,0.12);}
+.cico.warn{background:rgba(234,179,8,0.1);}
+.cico.danger{background:rgba(239,68,68,0.1);}
+.ctxt{font-size:0.83rem;line-height:1.65;color:var(--text);}
+.ctxt strong{color:#fff;}
+
+/* BANQUES */
+.bk-row{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.04);flex-wrap:wrap;
+}
+.bk-row:last-child{border:none;}
+.bk-name{font-weight:800;font-size:0.85rem;flex:1;min-width:140px;}
+.bk-rate{font-weight:900;font-size:0.95rem;color:var(--gold);}
+.bk-detail{font-size:0.75rem;color:var(--muted);text-align:right;flex:1;}
+.btag{font-size:0.62rem;padding:3px 10px;border-radius:6px;font-weight:800;text-transform:uppercase;white-space:nowrap;}
+.btag.best{background:rgba(34,197,94,0.15);color:var(--green);}
+.btag.mid{background:rgba(234,179,8,0.1);color:var(--yellow);}
+.btag.high{background:rgba(239,68,68,0.1);color:var(--red);}
+
+/* IRR ALERT */
+.irr-alert-box{
+  background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.2);
+  border-radius:14px;padding:18px;font-size:0.85rem;line-height:1.7;color:var(--text);
+}
+.irr-alert-box strong{color:var(--yellow);}
+
+/* ══════════════════════════════
+   ENGAGEMENT / SIGNATURE
+══════════════════════════════ */
+#engagement-section{display:none;margin-top:40px;}
+#engagement-section.show{display:block;animation:fadeUp 0.5s ease both;}
+.engagement-hero{
+  background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(4,16,30,0.95));
+  border:1.5px solid rgba(201,168,76,0.25);
+  border-radius:24px;padding:36px;margin-bottom:20px;
+  position:relative;overflow:hidden;
+}
+.engagement-hero::before{
+  content:'';position:absolute;top:-40%;right:-10%;
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,168,76,0.06),transparent 70%);
+}
+.engagement-hero .eg-icon{font-size:2.5rem;margin-bottom:16px;}
+.engagement-hero h2{
+  font-size:1.5rem;font-weight:900;margin-bottom:8px;letter-spacing:-0.02em;
+}
+.engagement-hero h2 span{color:var(--gold);}
+.engagement-hero p{color:var(--muted);font-size:0.92rem;line-height:1.6;max-width:540px;}
+
+.engagement-clauses{
+  list-style:none;margin:24px 0 0;display:flex;flex-direction:column;gap:10px;
+}
+.ec{
+  display:flex;align-items:flex-start;gap:12px;
+  background:rgba(4,16,30,0.6);border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;padding:14px 16px;
+}
+.ec-num{
+  width:24px;height:24px;min-width:24px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#04101E;font-size:0.72rem;font-weight:900;
+  display:flex;align-items:center;justify-content:center;margin-top:1px;
+}
+.ec-txt{font-size:0.83rem;line-height:1.6;color:var(--text);}
+.ec-txt strong{color:var(--gold2);}
+
+/* FORM ENGAGEMENT */
+.engage-form .grid2{gap:14px;}
+.checkbox-row{
+  display:flex;align-items:flex-start;gap:12px;
+  background:rgba(201,168,76,0.05);border:1.5px solid rgba(201,168,76,0.2);
+  border-radius:14px;padding:16px;margin-top:4px;cursor:pointer;
+}
+.checkbox-row input[type=checkbox]{
+  width:20px;height:20px;min-width:20px;padding:0;
+  accent-color:var(--gold);cursor:pointer;margin-top:2px;
+}
+.cb-label{font-size:0.85rem;line-height:1.6;color:var(--text);}
+.cb-label strong{color:var(--gold);}
+
+/* SIGNATURE */
+.sig-wrap{margin-top:16px;}
+.sig-label{font-size:0.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;}
+.sig-canvas-wrap{
+  border:1.5px solid rgba(201,168,76,0.25);border-radius:14px;overflow:hidden;
+  background:rgba(4,16,30,0.9);position:relative;
+}
+#sig-canvas{display:block;width:100%;height:140px;cursor:crosshair;touch-action:none;}
+.sig-tools{display:flex;gap:8px;padding:8px 12px;border-top:1px solid rgba(255,255,255,0.05);align-items:center;}
+.sig-tools .sig-hint{font-size:0.7rem;color:var(--muted);flex:1;}
+.sig-clear{
+  padding:5px 14px;border-radius:8px;font-size:0.72rem;font-weight:800;
+  background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--red);cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;transition:background 0.2s;
+}
+.sig-clear:hover{background:rgba(239,68,68,0.18);}
+
+/* CONFIRMATION FINALE */
+#confirmation{display:none;margin-top:20px;}
+#confirmation.show{display:block;animation:fadeUp 0.5s ease both;}
+.confirm-card{
+  background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(4,16,30,0.95));
+  border:1.5px solid rgba(34,197,94,0.3);border-radius:24px;padding:40px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.confirm-card::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(34,197,94,0.08),transparent 70%);
+  pointer-events:none;
+}
+.confirm-ico{font-size:3.5rem;margin-bottom:20px;display:block;}
+.confirm-card h2{font-size:1.6rem;font-weight:900;color:var(--green);margin-bottom:10px;}
+.confirm-card p{color:var(--muted);font-size:0.92rem;line-height:1.7;max-width:480px;margin:0 auto;}
+.dossier-num{
+  display:inline-block;margin:20px 0 10px;
+  background:rgba(34,197,94,0.1);border:1.5px solid rgba(34,197,94,0.25);
+  border-radius:12px;padding:10px 24px;
+  font-size:1.1rem;font-weight:900;color:var(--green);letter-spacing:0.04em;
+  font-variant-numeric:tabular-nums;
+}
+.confirm-steps{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin:24px 0 0;text-align:left;
+}
+@media(max-width:500px){.confirm-steps{grid-template-columns:1fr;}}
+.cs{
+  background:rgba(4,16,30,0.6);border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;padding:14px;
+}
+.cs-n{font-size:0.65rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+.cs-v{font-size:0.82rem;font-weight:700;color:var(--text);line-height:1.5;}
+
+.footer-note{
+  text-align:center;color:var(--muted);font-size:0.72rem;
+  margin-top:50px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.04);
+  line-height:1.7;
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header>
+  <div class="logo-block">
+    <div class="logo-icon">₣</div>
+    <div>
+      <div class="logo-text"><span>CréditPro</span> CI</div>
+      <span class="logo-tagline">Votre Courtier Bancaire</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="badge-courtier">🤝 Accompagnement Personnalisé</div>
+    <div class="header-step-indicator">
+      <div class="hstep active" id="hs1">1</div>
+      <div class="hstep-line"></div>
+      <div class="hstep" id="hs2">2</div>
+      <div class="hstep-line"></div>
+      <div class="hstep" id="hs3">✓</div>
+    </div>
+  </div>
+</header>
+
+<!-- ══ HERO ══ -->
+<div class="hero-section">
+  <div>
+    <div class="hero-eyebrow">✦ Service de courtage certifié CI</div>
+    <h1>Le crédit que tu mérites,<br><em>obtenu ensemble.</em></h1>
+    <p>Je négocie pour toi les meilleurs accords avec les banques ivoiriennes. Pas seul face à la banque — accompagné à chaque étape.</p>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hn">6+</div><div class="hl">Banques partenaires</div></div>
+      <div class="hstat" style="border-left:1px solid rgba(255,255,255,0.06);padding-left:24px"><div class="hn">48h</div><div class="hl">Réponse garantie</div></div>
+      <div class="hstat" style="border-left:1px solid rgba(255,255,255,0.06);padding-left:24px"><div class="hn">100%</div><div class="hl">Accompagné</div></div>
+    </div>
+  </div>
+  <div class="hero-card">
+    <div class="hc-title">Comment ça marche</div>
+    <div class="process-step">
+      <div class="ps-num">1</div>
+      <div class="ps-body">
+        <div class="ps-t">Simulation & Analyse</div>
+        <div class="ps-d">Tu remplis ton profil. On analyse ta capacité réelle de remboursement.</div>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="ps-num">2</div>
+      <div class="ps-body">
+        <div class="ps-t">Engagement & Dossier</div>
+        <div class="ps-d">Tu t'engages. Je prépare ton dossier selon les critères de chaque banque partenaire.</div>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="ps-num">3</div>
+      <div class="ps-body">
+        <div class="ps-t">Accompagnement Banque</div>
+        <div class="ps-d">Je t'accompagne physiquement au guichet. Tu n'es jamais seul face aux décideurs.</div>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="ps-num">4</div>
+      <div class="ps-body">
+        <div class="ps-t">Déblocage des fonds</div>
+        <div class="ps-d">L'accord est signé. Les fonds sont débloqués grâce à nos accords préalables.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FORMULAIRE ══ -->
+<div class="main-wrap">
+
+  <!-- ÉTAPE 1 : PROFIL -->
+  <div id="step-profil">
+    <div class="step-header">
+      <div class="step-badge">👤</div>
+      <div class="step-hd-text">
+        <div class="step-num">Étape 1 sur 2</div>
+        <h2>Ton profil financier</h2>
+      </div>
+    </div>
+
+    <!-- TYPE DE REVENU -->
+    <div class="mode-row" style="margin-bottom:20px;">
+      <div class="mbtn active" id="mode-sal" onclick="setMode('salarie')">
+        <div class="mbtn-ico">👔</div>
+        <div class="mbtn-txt">
+          <div class="mt">Salarié</div>
+          <div class="md">Revenu fixe mensuel</div>
+        </div>
+      </div>
+      <div class="mbtn" id="mode-com" onclick="setMode('commercant')">
+        <div class="mbtn-ico">🛒</div>
+        <div class="mbtn-txt">
+          <div class="mt">Commerçant / Indépendant</div>
+          <div class="md">Woro-woro, marchand, artisan, vendeur</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM SALARIÉ -->
+    <div id="form-salarie">
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title"><div class="ct-ico gold">💰</div>Revenus mensuels</div>
+          <div class="field">
+            <label class="lbl">Salaire net <span class="hint">Ce que tu reçois en main</span></label>
+            <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="s-salaire" placeholder="150 000" min="0"></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Autres revenus <span class="hint">Location, commerce...</span></label>
+            <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="s-autres" placeholder="0" min="0"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="ct-ico gold">🧾</div>Dépenses mensuelles</div>
+          <div class="dep-row"><span class="dep-ico">🏠</span><span class="dep-lbl">Loyer</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-loyer" placeholder="30 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">🍚</span><span class="dep-lbl">Nourriture</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-nourr" placeholder="25 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">🚌</span><span class="dep-lbl">Transport</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-trans" placeholder="15 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">📱</span><span class="dep-lbl">Téléphone</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-tel" placeholder="5 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">👨‍👩‍👧</span><span class="dep-lbl">Famille</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-fam" placeholder="10 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">➕</span><span class="dep-lbl">Autres</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-autre-dep" placeholder="5 000" min="0"></div></div>
+        </div>
+        <div class="card full">
+          <div class="card-title"><div class="ct-ico blue">🏦</div>Le crédit souhaité</div>
+          <div class="grid2" style="gap:16px">
+            <div class="field">
+              <label class="lbl">Montant à emprunter</label>
+              <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="s-montant" placeholder="500 000" min="0"></div>
+            </div>
+            <div class="field">
+              <label class="lbl">Durée de remboursement</label>
+              <div class="dur-row">
+                <div class="dpill" onclick="selDuree('s',6,this)">6 mois</div>
+                <div class="dpill" onclick="selDuree('s',12,this)">12 mois</div>
+                <div class="dpill" onclick="selDuree('s',24,this)">24 mois</div>
+                <div class="dpill" onclick="selDuree('s',36,this)">36 mois</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="analyserSalarie()">🔍 Analyser ma capacité de remboursement</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM COMMERÇANT -->
+    <div id="form-commercant" style="display:none">
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title"><div class="ct-ico green">📈</div>Tes revenus</div>
+          <div class="rev-grid">
+            <div class="rev-src">
+              <div class="rs-hd"><span class="ico">☀️</span><span>Par jour</span></div>
+              <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-jour" placeholder="5 000" min="0" oninput="calcRev()"></div>
+              <div style="font-size:0.65rem;color:var(--muted);margin-top:5px;font-weight:600;">× 22 jours / mois</div>
+            </div>
+            <div class="rev-src">
+              <div class="rs-hd"><span class="ico">📅</span><span>Par semaine</span></div>
+              <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-semaine" placeholder="30 000" min="0" oninput="calcRev()"></div>
+              <div style="font-size:0.65rem;color:var(--muted);margin-top:5px;font-weight:600;">× 4.3 / mois</div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="lbl">Autre revenu fixe mensuel</label>
+            <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-autre-rev" placeholder="0" min="0" oninput="calcRev()"></div>
+          </div>
+          <div class="ptabs">
+            <div class="ptab on" onclick="toggleMois(false,this)">Automatique</div>
+            <div class="ptab" onclick="toggleMois(true,this)">Je saisis moi-même</div>
+          </div>
+          <div class="mois-manual" id="mois-manual">
+            <div class="mois-row">
+              <div class="mbox bad"><div class="mlabel">😟 Mauvais</div><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-pire" placeholder="60 000" min="0"></div></div>
+              <div class="mbox ok"><div class="mlabel">😐 Normal</div><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-moyen" placeholder="120 000" min="0"></div></div>
+              <div class="mbox good"><div class="mlabel">😁 Bon</div><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-bon" placeholder="180 000" min="0"></div></div>
+            </div>
+          </div>
+          <div class="rev-auto" id="rev-auto">💡 Revenu estimé : <strong id="rev-calc" style="color:var(--green)">—</strong></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="ct-ico gold">🧾</div>Dépenses mensuelles</div>
+          <div class="dep-row"><span class="dep-ico">🏠</span><span class="dep-lbl">Loyer</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-loyer" placeholder="25 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">📦</span><span class="dep-lbl">Stock</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-stock" placeholder="30 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">🍚</span><span class="dep-lbl">Nourriture</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-nourr" placeholder="20 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">🚌</span><span class="dep-lbl">Transport</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-trans" placeholder="15 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">📱</span><span class="dep-lbl">Téléphone</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-tel" placeholder="5 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">👨‍👩‍👧</span><span class="dep-lbl">Famille</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-fam" placeholder="10 000" min="0"></div></div>
+          <div class="dep-row"><span class="dep-ico">➕</span><span class="dep-lbl">Autres</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-autre-dep" placeholder="5 000" min="0"></div></div>
+        </div>
+        <div class="card full">
+          <div class="card-title"><div class="ct-ico blue">🏦</div>Le crédit souhaité</div>
+          <div class="grid2" style="gap:16px">
+            <div class="field">
+              <label class="lbl">Montant à emprunter</label>
+              <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-montant" placeholder="300 000" min="0"></div>
+            </div>
+            <div class="field">
+              <label class="lbl">Durée</label>
+              <div class="dur-row">
+                <div class="dpill" onclick="selDuree('c',6,this)">6 mois</div>
+                <div class="dpill" onclick="selDuree('c',12,this)">12 mois</div>
+                <div class="dpill" onclick="selDuree('c',24,this)">24 mois</div>
+                <div class="dpill" onclick="selDuree('c',36,this)">36 mois</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="analyserCommercant()">🔍 Simuler mes 3 scénarios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RÉSULTATS ══ -->
+  <div id="results">
+    <div class="sep"><div class="sep-line"></div><div class="sep-label">📊 Résultats de ton analyse</div><div class="sep-line"></div></div>
+
+    <div id="sc-tabs-wrap" style="display:none">
+      <div class="sc-tabs">
+        <div class="sctab p on" onclick="showSc('pessimiste')"><div class="sctab-dot"></div>😟 Mauvais mois</div>
+        <div class="sctab r" onclick="showSc('realiste')"><div class="sctab-dot"></div>😐 Mois normal</div>
+        <div class="sctab o" onclick="showSc('optimiste')"><div class="sctab-dot"></div>😁 Bon mois</div>
+      </div>
+    </div>
+
+    <div id="verdict" class="verdict-bar green">
+      <div class="verd-emo" id="vemo">✅</div>
+      <div class="verd-txt"><h2 id="vtitre">—</h2><p id="vdesc">—</p></div>
+      <div class="verd-right"><div class="vr-val" id="vrate">—</div><div class="vr-lbl">Endettement</div></div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="sbox"><div class="sv gold" id="st-mens">—</div><div class="sl">Mensualité / mois</div></div>
+      <div class="sbox"><div class="sv" id="st-reste">—</div><div class="sl">Reste après crédit</div></div>
+      <div class="sbox"><div class="sv w" id="st-total">—</div><div class="sl">Total remboursé</div></div>
+      <div class="sbox"><div class="sv gold" id="st-int">—</div><div class="sl">Intérêts au total</div></div>
+      <div class="sbox"><div class="sv" id="st-taux">—</div><div class="sl">Taux endettement</div></div>
+      <div class="sbox"><div class="sv" id="st-niv">—</div><div class="sl">Niveau de risque</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><div class="ct-ico gold">📊</div>Répartition de ton budget</div>
+        <div style="font-size:0.75rem;color:var(--muted);font-weight:600;margin-bottom:6px;">Pour 100 FCFA de revenu :</div>
+        <div class="bbar">
+          <div class="bb-seg c" id="bbar-c">—</div>
+          <div class="bb-seg d" id="bbar-d">—</div>
+          <div class="bb-seg l" id="bbar-l">—</div>
+        </div>
+        <div class="bleg" style="margin-bottom:18px;">
+          <div class="bl-item"><div class="bl-dot" style="background:var(--gold)"></div>Crédit</div>
+          <div class="bl-item"><div class="bl-dot" style="background:rgba(60,80,110,0.9)"></div>Dépenses</div>
+          <div class="bl-item"><div class="bl-dot" style="background:rgba(34,197,94,0.5)"></div>Reste</div>
+        </div>
+        <div class="gauge-wrap">
+          <div class="gauge-hd"><span style="font-size:0.75rem;font-weight:700;">Taux d'endettement</span><span id="g-val" style="font-weight:900;">0%</span></div>
+          <div class="gauge-track">
+            <div class="gauge-zones"><div class="gz-green"></div><div class="gz-yellow"></div><div class="gz-red"></div></div>
+            <div class="gauge-fill" id="g-fill" style="width:0"></div>
+          </div>
+          <div class="gauge-ticks"><span>✅ &lt;30%</span><span>⚠️ 30–40%</span><span>🚫 &gt;40%</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="ct-ico gold">💬</div>Expliqué simplement</div>
+        <div class="explain-box"><h4>🧮 Ce que ça signifie concrètement</h4><p id="explain-txt">—</p></div>
+        <ul class="clist" id="clist"></ul>
+      </div>
+      <div class="card" id="irr-card" style="display:none">
+        <div class="card-title"><div class="ct-ico" style="background:rgba(234,179,8,0.1)">⚠️</div>Conseil commerçant</div>
+        <div class="irr-alert-box" id="irr-txt">—</div>
+      </div>
+      <div class="card full">
+        <div class="card-title"><div class="ct-ico blue">🏦</div>Comparatif banques partenaires</div>
+        <div id="bank-list"></div>
+      </div>
+    </div>
+
+    <!-- BOUTON VERS ENGAGEMENT -->
+    <div style="margin-top:24px;text-align:center;">
+      <button class="btn-primary" style="max-width:500px;margin:0 auto;display:block;" onclick="ouvrirEngagement()">
+        🤝 Continuer — Prendre mon engagement &amp; être accompagné
+      </button>
+      <p style="margin-top:10px;font-size:0.75rem;color:var(--muted);">Étape 2 sur 2 — Dossier officiel + accompagnement personnalisé en banque</p>
+    </div>
+  </div>
+
+  <!-- ══ ÉTAPE 2 : ENGAGEMENT ══ -->
+  <div id="engagement-section">
+    <div class="sep"><div class="sep-line"></div><div class="sep-label">🤝 Étape 2 — Engagement & Accompagnement</div><div class="sep-line"></div></div>
+
+    <div class="engagement-hero">
+      <div class="eg-icon">🏛️</div>
+      <h2>Mon engagement envers <span>CréditPro CI</span></h2>
+      <p>En signant cet engagement, tu acceptes les conditions de notre service d'accompagnement. Je m'engage de mon côté à te défendre auprès des banques partenaires et à obtenir la meilleure offre possible pour ton dossier.</p>
+      <ul class="engagement-clauses">
+        <li class="ec"><div class="ec-num">1</div><div class="ec-txt">Je fournirai des <strong>informations exactes et complètes</strong> sur mes revenus, mes dépenses et ma situation personnelle. Toute fausse déclaration annule l'accompagnement.</div></li>
+        <li class="ec"><div class="ec-num">2</div><div class="ec-txt">Je m'engage à <strong>préparer les documents demandés</strong> (pièce d'identité, justificatifs de revenus, relevés Mobile Money) dans les délais convenus avec mon courtier.</div></li>
+        <li class="ec"><div class="ec-num">3</div><div class="ec-txt">Je comprends que le crédit accordé doit être <strong>remboursé selon l'échéancier convenu</strong> avec la banque. En cas de difficulté, je contacte immédiatement mon courtier avant tout retard.</div></li>
+        <li class="ec"><div class="ec-num">4</div><div class="ec-txt">Je m'engage à <strong>honorer les rendez-vous bancaires</strong> fixés par mon courtier et à me présenter avec les documents complets. Toute absence sans préavis entraîne des frais de dossier.</div></li>
+        <li class="ec"><div class="ec-num">5</div><div class="ec-txt">Les <strong>frais de courtage</strong> (fixés et communiqués avant toute démarche) seront réglés uniquement en cas d'obtention effective du crédit. Aucun frais si échec.</div></li>
+      </ul>
+    </div>
+
+    <!-- INFOS CLIENT -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><div class="ct-ico gold">👤</div>Tes informations personnelles</div>
+      <div class="grid2">
+        <div class="field">
+          <label class="lbl">Prénom & Nom complet</label>
+          <input type="text" id="eg-nom" class="no-pfx" placeholder="Ex : Kouassi Jean-Michel">
+        </div>
+        <div class="field">
+          <label class="lbl">Numéro de téléphone (WhatsApp)</label>
+          <input type="tel" id="eg-tel" class="no-pfx" placeholder="+225 07 XX XX XX XX">
+        </div>
+        <div class="field">
+          <label class="lbl">Commune / Quartier</label>
+          <input type="text" id="eg-quartier" class="no-pfx" placeholder="Ex : Yopougon, Cocody, Abobo...">
+        </div>
+        <div class="field">
+          <label class="lbl">Profession</label>
+          <input type="text" id="eg-profession" class="no-pfx" placeholder="Ex : Agent commercial, Commerçante, Chauffeur...">
+        </div>
+        <div class="field full">
+          <label class="lbl">Pour quel projet veux-tu ce crédit ? <span class="hint">En quelques mots</span></label>
+          <textarea id="eg-projet" class="no-pfx" placeholder="Ex : Acheter du stock pour mon commerce, rembourser une dette urgente, financer un équipement..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECKBOX ENGAGEMENT -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title"><div class="ct-ico gold">✅</div>Acceptation des termes</div>
+      <div class="checkbox-row" onclick="toggleCheck('cb1')">
+        <input type="checkbox" id="cb1">
+        <label class="cb-label" for="cb1">Je confirme que <strong>toutes les informations financières saisies sont exactes</strong> et correspondent à ma situation réelle.</label>
+      </div>
+      <div class="checkbox-row" style="margin-top:10px;" onclick="toggleCheck('cb2')">
+        <input type="checkbox" id="cb2">
+        <label class="cb-label" for="cb2">J'accepte les <strong>5 clauses d'engagement</strong> listées ci-dessus et je m'engage à les respecter intégralement.</label>
+      </div>
+      <div class="checkbox-row" style="margin-top:10px;" onclick="toggleCheck('cb3')">
+        <input type="checkbox" id="cb3">
+        <label class="cb-label" for="cb3">J'autorise <strong>CréditPro CI</strong> à transmettre mon dossier aux banques partenaires dans le cadre de ma demande de crédit.</label>
+      </div>
+    </div>
+
+    <!-- SIGNATURE -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title"><div class="ct-ico gold">✍️</div>Signature électronique</div>
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;line-height:1.6;">Signe dans le cadre ci-dessous avec ton doigt (mobile) ou ta souris (ordinateur). Ta signature constitue ton accord officiel.</p>
+      <div class="sig-canvas-wrap">
+        <canvas id="sig-canvas"></canvas>
+        <div class="sig-tools">
+          <span class="sig-hint">✍️ Dessine ta signature ici</span>
+          <button class="sig-clear" onclick="clearSig()">Effacer</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="validerEngagement()">📋 Valider mon engagement &amp; Soumettre mon dossier</button>
+  </div>
+
+  <!-- ══ CONFIRMATION ══ -->
+  <div id="confirmation">
+    <div class="confirm-card">
+      <span class="confirm-ico">🎉</span>
+      <h2>Dossier soumis avec succès !</h2>
+      <p>Ton engagement a été enregistré. Je vais analyser ton dossier et te contacter dans les <strong style="color:var(--green)">48 heures</strong> pour confirmer le rendez-vous en banque.</p>
+      <div class="dossier-num" id="dossier-num">N° DOSSIER : CP-2026-XXXX</div>
+      <p style="font-size:0.8rem;color:var(--muted);margin-top:4px;">Garde ce numéro précieusement. Il te permettra de suivre ton dossier.</p>
+      <div class="confirm-steps">
+        <div class="cs"><div class="cs-n">Prochaine étape</div><div class="cs-v">📞 Appel de confirmation sous 24h</div></div>
+        <div class="cs"><div class="cs-n">Documents à préparer</div><div class="cs-v">🪪 CNI • 📋 Justificatifs revenus • 📱 Relevés Mobile Money</div></div>
+        <div class="cs"><div class="cs-n">Rendez-vous banque</div><div class="cs-v">🏦 Fixé ensemble. Tu ne vas jamais seul.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    ⚠️ Simulation à but éducatif. Taux indicatifs basés sur le marché ivoirien.<br>
+    CréditPro CI n'est pas une banque. Nous sommes un service de courtage et d'accompagnement indépendant.
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let mode = 'salarie';
+let dureeS = null, dureeC = null;
+let scenarios = null;
+let currentSc = 'pessimiste';
+let isComm = false;
+let manualMois = false;
+let sigDrawing = false;
+let sigHasContent = false;
+let lastPos = {x:0, y:0};
+let resultData = {};
+
+// ── MODE ──
+function setMode(m) {
+  mode = m;
+  document.getElementById('form-salarie').style.display = m === 'salarie' ? 'block' : 'none';
+  document.getElementById('form-commercant').style.display = m === 'commercant' ? 'block' : 'none';
+  document.getElementById('mode-sal').classList.toggle('active', m === 'salarie');
+  document.getElementById('mode-com').classList.toggle('active', m === 'commercant');
+  hide('results'); hide('engagement-section'); hide('confirmation');
+}
+
+function selDuree(f, v, el) {
+  if(f==='s') dureeS=v; else dureeC=v;
+  el.closest('.dur-row').querySelectorAll('.dpill').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function toggleMois(manual, el) {
+  manualMois = manual;
+  el.closest('.ptabs').querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  const mv = document.getElementById('mois-manual');
+  const ad = document.getElementById('rev-auto');
+  mv.classList.toggle('show', manual);
+  ad.style.display = manual ? 'none' : 'block';
+  if(!manual) calcRev();
+}
+
+function calcRev() {
+  const j = parseFloat(document.getElementById('c-jour').value)||0;
+  const s = parseFloat(document.getElementById('c-semaine').value)||0;
+  const a = parseFloat(document.getElementById('c-autre-rev').value)||0;
+  const t = j*22 + s*4.3 + a;
+  document.getElementById('rev-calc').textContent = t>0 ? fmt(t) : '—';
+  return t;
+}
+
+function toggleCheck(id) {
+  const cb = document.getElementById(id);
+  cb.checked = !cb.checked;
+}
+
+// ── UTILS ──
+function fmt(n){ return Math.round(n).toLocaleString('fr-FR')+' FCFA'; }
+function pct(n){ return Math.round(n)+'%'; }
+function show(id){ const el=document.getElementById(id); el.style.display='block'; void el.offsetWidth; el.classList.add('show'); }
+function hide(id){ document.getElementById(id).style.display='none'; document.getElementById(id).classList.remove('show'); }
+
+function getMens(montant, duree, tauxAn) {
+  const tm = tauxAn/12;
+  if(tm===0) return montant/duree;
+  return montant*(tm*Math.pow(1+tm,duree))/(Math.pow(1+tm,duree)-1);
+}
+function getDep(ids){ return ids.reduce((s,id)=>s+(parseFloat(document.getElementById(id)?.value)||0),0); }
+
+// ── ANALYSER SALARIÉ ──
+function analyserSalarie() {
+  const rev = (parseFloat(document.getElementById('s-salaire').value)||0)
+             +(parseFloat(document.getElementById('s-autres').value)||0);
+  const dep = getDep(['s-loyer','s-nourr','s-trans','s-tel','s-fam','s-autre-dep']);
+  const montant = parseFloat(document.getElementById('s-montant').value)||0;
+  const duree = dureeS;
+  if(!rev||!montant||!duree) return alert('⚠️ Remplis le salaire, le montant et sélectionne une durée.');
+  isComm = false;
+  resultData = {rev, dep, montant, duree};
+  document.getElementById('sc-tabs-wrap').style.display='none';
+  afficherResultats({rev,dep,montant,duree});
+}
+
+// ── ANALYSER COMMERÇANT ──
+function analyserCommercant() {
+  const montant = parseFloat(document.getElementById('c-montant').value)||0;
+  const duree = dureeC;
+  if(!montant||!duree) return alert('⚠️ Entre le montant et sélectionne une durée.');
+  const dep = getDep(['c-loyer','c-stock','c-nourr','c-trans','c-tel','c-fam','c-autre-dep']);
+  let pire,moyen,bon;
+  if(manualMois){
+    moyen=parseFloat(document.getElementById('c-moyen').value)||0;
+    pire=parseFloat(document.getElementById('c-pire').value)||moyen*0.6;
+    bon=parseFloat(document.getElementById('c-bon').value)||moyen*1.5;
+    if(!moyen) return alert('⚠️ Entre au moins ton revenu en mois normal.');
+  } else {
+    moyen=calcRev();
+    if(!moyen) return alert('⚠️ Entre un revenu journalier ou hebdomadaire.');
+    pire=moyen*0.55; bon=moyen*1.55;
+  }
+  isComm=true;
+  scenarios={pessimiste:{rev:pire,dep,montant,duree},realiste:{rev:moyen,dep,montant,duree},optimiste:{rev:bon,dep,montant,duree}};
+  currentSc='pessimiste';
+  updateScTabs();
+  document.getElementById('sc-tabs-wrap').style.display='block';
+  resultData=scenarios.pessimiste;
+  afficherResultats(scenarios.pessimiste);
+}
+
+function showSc(s){
+  currentSc=s;
+  updateScTabs();
+  resultData=scenarios[s];
+  afficherResultats(scenarios[s]);
+}
+
+function updateScTabs(){
+  const map={pessimiste:'p',realiste:'r',optimiste:'o'};
+  document.querySelectorAll('.sctab').forEach(t=>{
+    const cls=t.className.split(' ').find(c=>['p','r','o'].includes(c));
+    t.classList.toggle('on',map[currentSc]===cls);
+  });
+}
+
+// ── AFFICHER RÉSULTATS ──
+function afficherResultats({rev,dep,montant,duree}){
+  const tRef=0.12;
+  const mens=getMens(montant,duree,tRef);
+  const total=mens*duree;
+  const int=total-montant;
+  const reste=rev-dep-mens;
+  const tx=(mens/rev)*100;
+
+  let cls,emo,titre,desc;
+  if(tx<30&&reste>0){cls='green';emo='✅';titre='Dossier Finançable';desc='Ton profil est sain. Je peux défendre ton dossier auprès de nos banques partenaires avec confiance.';}
+  else if(tx<40&&reste>0){cls='yellow';emo='⚠️';titre='Dossier à Optimiser';desc='C\'est possible mais limite. On va travailler ensemble sur quelques ajustements avant de solliciter les banques.';}
+  else{cls='red';emo='🚫';titre=reste<=0?'Dossier Non Finançable':'Dossier Très Risqué';desc=reste<=0?'Le revenu ne couvre pas les dépenses actuelles. On doit revoir le montant ou la durée.':'Ce niveau d\'endettement dépassera les critères des banques. Réduisons le montant demandé.';}
+
+  const v=document.getElementById('verdict');
+  v.className='verdict-bar '+cls;
+  document.getElementById('vemo').textContent=emo;
+  document.getElementById('vtitre').textContent=titre;
+  document.getElementById('vdesc').textContent=desc;
+  document.getElementById('vrate').textContent=pct(tx);
+
+  const rc=reste>0?'g':'r';
+  setText('st-mens',fmt(mens),'gold');
+  setText('st-reste',fmt(reste),rc);
+  setText('st-total',fmt(total),'w');
+  setText('st-int',fmt(int),'gold');
+  const tc=tx<30?'g':tx<40?'y':'r';
+  setText('st-taux',pct(tx),tc);
+  const niv=tx<30?'Faible ✅':tx<40?'Moyen ⚠️':'Élevé 🚫';
+  setText('st-niv',niv,tc);
+
+  // Gauge
+  document.getElementById('g-val').textContent=pct(tx);
+  setTimeout(()=>{
+    const f=document.getElementById('g-fill');
+    f.style.width=Math.min(tx,100)+'%';
+    f.style.background=tx<30?'var(--green)':tx<40?'var(--yellow)':'var(--red)';
+  },80);
+
+  // Budget bar
+  const pC=Math.min((mens/rev)*100,100);
+  const pD=Math.min((dep/rev)*100,100-pC);
+  const pL=Math.max(100-pC-pD,0);
+  setTimeout(()=>{setBar('bbar-c',pC);setBar('bbar-d',pD);setBar('bbar-l',pL);},80);
+
+  // Explication
+  const intMois=Math.round(int/duree);
+  document.getElementById('explain-txt').innerHTML=
+    `Tu veux <strong>${fmt(montant)}</strong> sur <strong>${duree} mois</strong>. Chaque mois tu paieras <strong>${fmt(mens)}</strong>.<br><br>
+    C'est <strong>${fmt(Math.round(montant/duree))}</strong> de capital + <strong>${fmt(intMois)}</strong> d'intérêts. Au total tu rembourseras <strong>${fmt(total)}</strong>.<br><br>
+    Il te restera <strong>${fmt(reste)}</strong> par mois pour vivre.`;
+
+  // Conseils
+  const cons=[];
+  if(tx>40) cons.push({t:'danger',i:'🚫',txt:`<strong>Taux d'endettement trop élevé (${pct(tx)}).</strong> Les banques exigent moins de 40%. Je te conseille de demander ${fmt(montant*0.7)} ou passer à 36 mois.`});
+  if(tx>30&&tx<=40) cons.push({t:'warn',i:'⚠️',txt:`<strong>Taux limite (${pct(tx)}).</strong> On peut passer, mais j'aurai besoin de documents solides pour convaincre la banque.`});
+  if(reste<20000&&reste>0) cons.push({t:'warn',i:'💸',txt:`<strong>Reste de vie très serré (${fmt(reste)}).</strong> En cas d'imprévu, tu peux avoir du mal à rembourser. Prévoyons une marge de sécurité.`});
+  if(reste<=0) cons.push({t:'danger',i:'❌',txt:`<strong>Déficit mensuel.</strong> Il faut réduire le montant ou allonger la durée. Parlons-en ensemble.`});
+  if(tx<30&&reste>30000) cons.push({t:'ok',i:'✅',txt:`<strong>Excellent profil !</strong> Ton dossier est solide. Je vais négocier le meilleur taux pour toi auprès de nos partenaires.`});
+  if(isComm) cons.push({t:'warn',i:'📋',txt:`<strong>Commerçant :</strong> Prépare tes reçus Mobile Money (3 derniers mois) et un carnet de ventes. Ça renforce ton dossier.`});
+  else cons.push({t:'ok',i:'📋',txt:`<strong>Documents à préparer :</strong> 3 bulletins de salaire, 3 relevés bancaires, CNI valide.`});
+
+  document.getElementById('clist').innerHTML=cons.map(c=>`<li class="ci"><div class="cico ${c.t}">${c.i}</div><div class="ctxt">${c.txt}</div></li>`).join('');
+
+  if(isComm&&scenarios){
+    document.getElementById('irr-card').style.display='block';
+    document.getElementById('irr-txt').innerHTML=buildIrr(scenarios,mens);
+  } else document.getElementById('irr-card').style.display='none';
+
+  // Banques
+  const banques=[
+    {n:'SGBCI (Société Générale)',t:10.5,tag:'best'},
+    {n:'BICICI (BNP Paribas)',t:11.0,tag:'best'},
+    {n:'Ecobank CI',t:11.5,tag:'mid'},
+    {n:'Banque Atlantique',t:12.0,tag:'mid'},
+    {n:'SIB',t:12.5,tag:'high'},
+    {n:'UBA Côte d\'Ivoire',t:13.0,tag:'high'},
+  ];
+  const labels={best:'Meilleur taux',mid:'Taux moyen',high:'Taux élevé'};
+  document.getElementById('bank-list').innerHTML=banques.map(b=>{
+    const m=getMens(montant,duree,b.t/100);
+    return `<div class="bk-row"><div class="bk-name">🏦 ${b.n}</div><div class="bk-rate">${b.t}% / an</div><div class="bk-detail">${fmt(m)} / mois<br>Total : ${fmt(m*duree)}</div><span class="btag ${b.tag}">${labels[b.tag]}</span></div>`;
+  }).join('');
+
+  const res=document.getElementById('results');
+  res.style.display='block';
+  void res.offsetWidth;
+  res.classList.add('show');
+  setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  setStep(2);
+}
+
+function buildIrr(sc,mens){
+  const donne=(s)=>{const d=scenarios[s];return d.rev-d.dep-mens>0;};
+  const [ok1,ok2,ok3]=[donne('pessimiste'),donne('realiste'),donne('optimiste')];
+  let t=`<strong>Analyse sur tes 3 scénarios :</strong><br><br>`;
+  t+=`😟 <strong>Mauvais mois</strong> (${fmt(sc.pessimiste.rev)}) → ${ok1?'✅ Remboursement possible':'❌ Insuffisant'}<br>`;
+  t+=`😐 <strong>Mois normal</strong> (${fmt(sc.realiste.rev)}) → ${ok2?'✅ Remboursement possible':'❌ Insuffisant'}<br>`;
+  t+=`😁 <strong>Bon mois</strong> (${fmt(sc.optimiste.rev)}) → ${ok3?'✅ Remboursement possible':'❌ Insuffisant'}<br><br>`;
+  if(!ok1&&ok2) t+=`⚠️ Les mauvais mois seront difficiles. <strong>Je te conseille de constituer une réserve de 1–2 mensualités</strong> avant de commencer.`;
+  else if(!ok2) t+=`🚫 <strong>Même en mois normal tu ne peux pas rembourser.</strong> Revoyons le montant ensemble.`;
+  else if(ok1) t+=`✅ <strong>Dossier très solide !</strong> Tu peux rembourser même en mauvais mois. Excellent signal pour les banques.`;
+  return t;
+}
+
+function ouvrirEngagement(){
+  const es=document.getElementById('engagement-section');
+  es.style.display='block';
+  void es.offsetWidth;
+  es.classList.add('show');
+  setTimeout(()=>es.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  initSig();
+  setStep(2);
+}
+
+// ── SIGNATURE ──
+let canvas,ctx;
+function initSig(){
+  canvas=document.getElementById('sig-canvas');
+  const dpr=window.devicePixelRatio||1;
+  const rect=canvas.getBoundingClientRect();
+  canvas.width=rect.width*dpr||600;
+  canvas.height=140*dpr;
+  ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.strokeStyle='#C9A84C';
+  ctx.lineWidth=2.5;
+  ctx.lineCap='round';
+  ctx.lineJoin='round';
+
+  canvas.addEventListener('mousedown',e=>{sigDrawing=true;const p=pos(e);lastPos=p;});
+  canvas.addEventListener('mousemove',e=>{if(!sigDrawing)return;draw(pos(e));});
+  canvas.addEventListener('mouseup',()=>sigDrawing=false);
+  canvas.addEventListener('mouseleave',()=>sigDrawing=false);
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();sigDrawing=true;const p=pos(e.touches[0]);lastPos=p;},{passive:false});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!sigDrawing)return;draw(pos(e.touches[0]));},{passive:false});
+  canvas.addEventListener('touchend',()=>sigDrawing=false);
+}
+
+function pos(e){
+  const r=canvas.getBoundingClientRect();
+  return{x:e.clientX-r.left,y:e.clientY-r.top};
+}
+function draw(p){
+  ctx.beginPath();ctx.moveTo(lastPos.x,lastPos.y);ctx.lineTo(p.x,p.y);ctx.stroke();
+  lastPos=p;sigHasContent=true;
+}
+function clearSig(){if(ctx){ctx.clearRect(0,0,canvas.width,canvas.height);}sigHasContent=false;}
+
+// ── VALIDATION ENGAGEMENT ──
+function validerEngagement(){
+  const nom=document.getElementById('eg-nom').value.trim();
+  const tel=document.getElementById('eg-tel').value.trim();
+  const quartier=document.getElementById('eg-quartier').value.trim();
+  const profession=document.getElementById('eg-profession').value.trim();
+  const projet=document.getElementById('eg-projet').value.trim();
+  const cb1=document.getElementById('cb1').checked;
+  const cb2=document.getElementById('cb2').checked;
+  const cb3=document.getElementById('cb3').checked;
+
+  if(!nom||!tel||!quartier||!profession) return alert('⚠️ Remplis toutes tes informations personnelles.');
+  if(!projet) return alert('⚠️ Précise le projet pour lequel tu demandes ce crédit.');
+  if(!cb1||!cb2||!cb3) return alert('⚠️ Tu dois cocher les 3 cases d\'acceptation pour continuer.');
+  if(!sigHasContent) return alert('⚠️ Signe dans le cadre prévu avant de valider.');
+
+  const num='CP-2026-'+String(Math.floor(Math.random()*9000)+1000);
+  document.getElementById('dossier-num').textContent='N° DOSSIER : '+num;
+
+  const conf=document.getElementById('confirmation');
+  conf.style.display='block';
+  void conf.offsetWidth;
+  conf.classList.add('show');
+  setTimeout(()=>conf.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  setStep(3);
+}
+
+// ── STEPS ──
+function setStep(n){
+  [1,2,3].forEach(i=>{
+    const el=document.getElementById('hs'+i);
+    if(i<n){el.className='hstep done';el.textContent='✓';}
+    else if(i===n){el.className='hstep active';el.textContent=i;}
+    else{el.className='hstep';el.textContent=i;}
+  });
+}
+
+// ── DOM HELPERS ──
+function setText(id,val,cls){const el=document.getElementById(id);el.textContent=val;el.className='sv '+(cls||'w');}
+function setBar(id,p){const el=document.getElementById(id);el.style.width=Math.max(p,0)+'%';el.textContent=Math.round(p)>6?Math.round(p)+'%':'';}
+</script>
+</body>
+</html>
