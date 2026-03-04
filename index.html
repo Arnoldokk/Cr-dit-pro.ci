@@ -1150,20 +1150,79 @@ function afficherResultats({rev,dep,montant,duree}){
     document.getElementById('irr-txt').innerHTML=buildIrr(scenarios,mens);
   } else document.getElementById('irr-card').style.display='none';
 
-  // Banques
+  // Banques — taux réels marché ivoirien 2025
   const banques=[
-    {n:'SGBCI (Société Générale)',t:10.5,tag:'best'},
-    {n:'BICICI (BNP Paribas)',t:11.0,tag:'best'},
-    {n:'Ecobank CI',t:11.5,tag:'mid'},
-    {n:'Banque Atlantique',t:12.0,tag:'mid'},
-    {n:'SIB',t:12.5,tag:'high'},
-    {n:'UBA Côte d\'Ivoire',t:13.0,tag:'high'},
+    {n:'SGBCI (Société Générale)',t:10.75,tag:'best',info:'Salarié CDI · Domiciliation salaire obligatoire'},
+    {n:'BICICI (BNP Paribas)',t:11.0,tag:'best',info:'Salarié · Fonctionnaire · Durée max 48 mois'},
+    {n:'SIB',t:11.5,tag:'mid',info:'Salarié · Fonctionnaire · Domiciliation requise'},
+    {n:'Ecobank CI',t:12.0,tag:'mid',info:'Salarié & Informel accepté · Mobile Money pris en compte'},
+    {n:'Banque Atlantique',t:12.5,tag:'mid',info:'Informel accepté · Commerçant possible'},
+    {n:'NSIA Banque',t:13.0,tag:'high',info:'Particuliers · Professions libérales'},
+    {n:'BNI',t:13.5,tag:'high',info:'Fonctionnaire prioritaire · Projet immobilier'},
+    {n:'UBA Côte d\'Ivoire',t:14.0,tag:'high',info:'Commerce & transferts · Réseau Afrique'},
   ];
-  const labels={best:'Meilleur taux',mid:'Taux moyen',high:'Taux élevé'};
-  document.getElementById('bank-list').innerHTML=banques.map(b=>{
+  const labels={best:'Taux compétitif',mid:'Taux moyen',high:'Taux élevé'};
+  document.getElementById('bank-list').innerHTML=`
+    <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:0.78rem;color:var(--muted);line-height:1.6;">
+      ℹ️ <strong style="color:var(--gold)">Taux indicatifs 2025</strong> — Taux directeur BCEAO : 3,5% · Taux maximum légal (UMOA) : 24% · Les taux varient selon profil, durée et domiciliation.
+    </div>`+
+  banques.map(b=>{
     const m=getMens(montant,duree,b.t/100);
-    return `<div class="bk-row"><div class="bk-name">🏦 ${b.n}</div><div class="bk-rate">${b.t}% / an</div><div class="bk-detail">${fmt(m)} / mois<br>Total : ${fmt(m*duree)}</div><span class="btag ${b.tag}">${labels[b.tag]}</span></div>`;
+    return `<div class="bk-row">
+      <div>
+        <div class="bk-name">🏦 ${b.n}</div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:2px;">${b.info}</div>
+      </div>
+      <div class="bk-rate">${b.t}%<span style="font-size:0.65rem;font-weight:600;color:var(--muted)">/an</span></div>
+      <div class="bk-detail">${fmt(m)} / mois<br>Total : ${fmt(m*duree)}</div>
+      <span class="btag ${b.tag}">${labels[b.tag]}</span>
+    </div>`;
   }).join('');
+
+  // Documents requis selon profil
+  const docsSalarie=[
+    {ico:'🪪',txt:'CNI ou passeport en cours de validité'},
+    {ico:'📋',txt:'3 derniers bulletins de salaire'},
+    {ico:'🏢',txt:'Attestation de travail ou contrat CDI'},
+    {ico:'🏦',txt:'3 derniers relevés bancaires'},
+    {ico:'🏠',txt:'Justificatif de domicile — facture CIE/SODECI de moins de 3 mois'},
+    {ico:'📝',txt:'Formulaire de demande de crédit (fourni par la banque)'},
+    {ico:'📸',txt:'2 photos d\'identité récentes'},
+  ];
+  const docsCommercant=[
+    {ico:'🪪',txt:'CNI ou passeport en cours de validité'},
+    {ico:'📦',txt:'Registre de Commerce (RCCM) — P0, P2 ou P2 bis'},
+    {ico:'📱',txt:'Relevés Mobile Money des 3 derniers mois (MTN/Orange)'},
+    {ico:'📒',txt:'Carnet de ventes ou journal de caisse (3 mois minimum)'},
+    {ico:'🏠',txt:'Justificatif de domicile — facture CIE/SODECI de moins de 3 mois'},
+    {ico:'📸',txt:'2 photos d\'identité récentes'},
+    {ico:'📝',txt:'Formulaire de demande de crédit (fourni par la banque)'},
+    {ico:'💡',txt:'Attestation de local commercial si disponible'},
+  ];
+  const docs = isComm ? docsCommercant : docsSalarie;
+  const docsHtml = docs.map(d=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <span style="font-size:1rem;width:22px;flex-shrink:0;">${d.ico}</span>
+      <span style="font-size:0.82rem;color:var(--text);line-height:1.5;">${d.txt}</span>
+    </div>`).join('');
+
+  // Injecter la section documents si elle n'existe pas encore
+  if(!document.getElementById('docs-section')){
+    const docsCard=document.createElement('div');
+    docsCard.id='docs-section';
+    docsCard.className='card full';
+    docsCard.innerHTML=`
+      <div class="card-title"><div class="ct-ico green">📂</div>Documents à préparer pour ton dossier</div>
+      <div style="background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.15);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:0.78rem;color:var(--muted);line-height:1.6;">
+        ✅ <strong style="color:var(--green)">Profil : ${isComm?'Commerçant / Indépendant':'Salarié'}</strong> — Voici la liste exacte des documents demandés par les banques ivoiriennes.
+      </div>
+      <div id="docs-list">${docsHtml}</div>`;
+    document.getElementById('bank-list').closest('.card').after(docsCard);
+  } else {
+    document.getElementById('docs-list').innerHTML=docsHtml;
+    document.querySelector('#docs-section .card-title').nextElementSibling.innerHTML=
+      `✅ <strong style="color:var(--green)">Profil : ${isComm?'Commerçant / Indépendant':'Salarié'}</strong> — Voici la liste exacte des documents demandés par les banques ivoiriennes.`;
+  }
 
   const res=document.getElementById('results');
   res.style.display='block';
