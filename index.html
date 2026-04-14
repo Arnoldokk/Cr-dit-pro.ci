@@ -1,1358 +1,684 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CréditPro CI — Votre Courtier de Confiance</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-:root{
-  --gold:#C9A84C;
-  --gold2:#F0C97A;
-  --gold-glow:rgba(201,168,76,0.18);
-  --navy:#04101E;
-  --navy2:#071628;
-  --navy3:#0C2038;
-  --card:rgba(255,255,255,0.035);
-  --card-border:rgba(255,255,255,0.07);
-  --text:#EEF2F7;
-  --muted:#6A8DAA;
-  --green:#22C55E;
-  --red:#EF4444;
-  --yellow:#EAB308;
-  --accent:#1E90FF;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{
-  font-family:'Plus Jakarta Sans',sans-serif;
-  background:var(--navy);color:var(--text);
-  min-height:100vh;overflow-x:hidden;
-}
-/* BG */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%,rgba(201,168,76,0.07),transparent 60%),
-    radial-gradient(ellipse 40% 60% at 100% 80%,rgba(30,144,255,0.04),transparent 60%);
-}
-/* SCROLLBAR */
-::-webkit-scrollbar{width:5px;}
-::-webkit-scrollbar-track{background:#04101E;}
-::-webkit-scrollbar-thumb{background:#C9A84C44;border-radius:4px;}
+import { useState, useEffect, useRef } from "react";
 
-/* ══ HEADER ══ */
-header{
-  position:sticky;top:0;z-index:200;
-  background:rgba(4,16,30,0.92);
-  backdrop-filter:blur(20px) saturate(1.4);
-  border-bottom:1px solid rgba(201,168,76,0.12);
-  padding:0 40px;height:70px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.logo-block{display:flex;align-items:center;gap:12px;}
-.logo-icon{
-  width:38px;height:38px;border-radius:10px;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.1rem;flex-shrink:0;
-  box-shadow:0 0 20px rgba(201,168,76,0.3);
-}
-.logo-text{font-size:1.2rem;font-weight:900;letter-spacing:-0.02em;}
-.logo-text span{color:var(--gold);}
-.logo-tagline{font-size:0.65rem;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-top:-1px;}
-.header-right{display:flex;align-items:center;gap:12px;}
-.badge-courtier{
-  padding:6px 16px;border-radius:20px;
-  background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));
-  border:1px solid rgba(201,168,76,0.3);
-  font-size:0.7rem;font-weight:800;letter-spacing:0.08em;
-  color:var(--gold);text-transform:uppercase;
-}
-.header-step-indicator{display:flex;align-items:center;gap:6px;}
-.hstep{
-  width:28px;height:28px;border-radius:50%;
-  border:2px solid rgba(255,255,255,0.1);
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.7rem;font-weight:800;color:var(--muted);
-  transition:all 0.3s;
-}
-.hstep.done{background:rgba(34,197,94,0.15);border-color:var(--green);color:var(--green);}
-.hstep.active{background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold);}
-.hstep-line{width:20px;height:2px;background:rgba(255,255,255,0.08);}
+const GOLD="#C9A84C", GOLD2="#E8C97A", NAVY="#04101E";
+const fmt = n => Math.round(n).toLocaleString("fr-FR")+" FCFA";
+const pct = n => Math.round(n)+"%";
+const getMens = (m,d,t) => { const tm=t/12; if(!tm) return m/d; return m*(tm*Math.pow(1+tm,d))/(Math.pow(1+tm,d)-1); };
 
-/* ══ HERO ══ */
-.hero-section{
-  padding:70px 40px 50px;
-  max-width:1100px;margin:0 auto;
-  display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center;
-}
-@media(max-width:750px){.hero-section{grid-template-columns:1fr;padding:40px 20px 30px;gap:30px;}}
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:6px 14px;border-radius:20px;
-  background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);
-  font-size:0.72rem;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:20px;
-}
-.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.hero h1{
-  font-size:clamp(2.2rem,4vw,3.4rem);
-  font-weight:900;line-height:1.08;
-  letter-spacing:-0.03em;margin-bottom:18px;
-}
-.hero h1 em{
-  color:transparent;font-style:normal;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  -webkit-background-clip:text;background-clip:text;
-}
-.hero p{color:var(--muted);font-size:1rem;line-height:1.7;max-width:440px;}
-.hero-stats{
-  display:flex;gap:24px;margin-top:32px;flex-wrap:wrap;
-}
-.hstat{text-align:center;}
-.hstat .hn{font-size:1.6rem;font-weight:900;color:var(--gold);letter-spacing:-0.02em;}
-.hstat .hl{font-size:0.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;}
-.hero-card{
-  background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(4,16,30,0.9));
-  border:1px solid rgba(201,168,76,0.2);
-  border-radius:24px;padding:32px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.4),0 0 0 1px rgba(201,168,76,0.05) inset;
-}
-.hc-title{font-size:0.75rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:18px;}
-.process-step{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;}
-.process-step:last-child{margin-bottom:0;}
-.ps-num{
-  width:32px;height:32px;min-width:32px;border-radius:50%;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  color:#04101E;font-weight:900;font-size:0.8rem;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 12px rgba(201,168,76,0.3);
-}
-.ps-body .ps-t{font-weight:800;font-size:0.88rem;margin-bottom:2px;}
-.ps-body .ps-d{font-size:0.78rem;color:var(--muted);line-height:1.5;}
+const BANKS = [
+  {n:"SGBCI (Société Générale)",t:10.75,tag:"best",q:"Domiciliation salaire obligatoire",profiles:["salarie","fonctionnaire"]},
+  {n:"BICICI (BNP Paribas)",t:11.0,tag:"best",q:"Durée max 48 mois",profiles:["salarie","fonctionnaire"]},
+  {n:"SIB",t:11.5,tag:"mid",q:"Domiciliation requise",profiles:["salarie","fonctionnaire"]},
+  {n:"Ecobank CI",t:12.0,tag:"mid",q:"Mobile Money accepté ✅",profiles:["salarie","informel","pme"]},
+  {n:"Banque Atlantique",t:12.5,tag:"mid",q:"Informel accepté ✅",profiles:["informel","pme","salarie"]},
+  {n:"NSIA Banque",t:13.0,tag:"high",q:"Professions libérales",profiles:["salarie","pme"]},
+  {n:"BNI",t:13.5,tag:"high",q:"Fonctionnaire prioritaire",profiles:["fonctionnaire"]},
+  {n:"UBA CI",t:14.0,tag:"high",q:"Commerce & transferts",profiles:["pme","informel"]},
+];
 
-/* ══ WRAPPER PRINCIPAL ══ */
-.main-wrap{max-width:1100px;margin:0 auto;padding:0 40px 80px;}
-@media(max-width:750px){.main-wrap{padding:0 16px 60px;}}
+const DOCS = {
+  salarie:["🪪 CNI ou passeport valide","📋 3 derniers bulletins de salaire","🏢 Attestation de travail / Contrat CDI","🏦 3 derniers relevés bancaires","🏠 Justificatif domicile (CIE/SODECI < 3 mois)","📸 2 photos d'identité récentes","📝 Formulaire demande crédit (banque)"],
+  fonctionnaire:["🪪 CNI ou passeport valide","📋 3 derniers bulletins de salaire","🏛️ Arrêté de nomination ou attestation de service","🏦 3 derniers relevés bancaires","🏠 Justificatif domicile (CIE/SODECI < 3 mois)","📸 2 photos d'identité récentes","📝 Formulaire demande crédit (banque)"],
+  informel:["🪪 CNI ou passeport valide","📱 Relevés Mobile Money 3 derniers mois (MTN/Orange/Wave)","📒 Carnet de ventes ou journal de caisse (3 mois)","📦 Registre de Commerce RCCM si disponible","🏠 Justificatif domicile (CIE/SODECI < 3 mois)","📸 2 photos d'identité récentes","💡 Attestation local commercial si disponible"],
+  pme:["🪪 CNI ou passeport valide","📦 Registre de Commerce (RCCM) en cours de validité","📊 2 derniers bilans comptables ou relevés CA","🏦 6 derniers relevés bancaires entreprise","📝 Business plan ou note de présentation du projet","🏠 Justificatif domicile dirigeant","📸 2 photos d'identité récentes"],
+};
 
-/* ══ STEPS ══ */
-.step-header{
-  display:flex;align-items:center;gap:14px;margin-bottom:28px;
-  padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.05);
-}
-.step-badge{
-  width:42px;height:42px;border-radius:12px;flex-shrink:0;
-  background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.05));
-  border:1.5px solid rgba(201,168,76,0.3);
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.1rem;
-}
-.step-hd-text .step-num{font-size:0.68rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;}
-.step-hd-text h2{font-size:1.15rem;font-weight:800;color:var(--text);margin-top:1px;}
+const TEMOIGNAGES = [
+  {nom:"Koné Aminata",quartier:"Yopougon",montant:"800 000 FCFA",duree:"24 mois",profil:"Commerçante",texte:"Je n'y croyais plus. CréditPro CI a préparé mon dossier avec mes relevés Wave et m'a accompagnée à Ecobank. J'ai eu mon crédit en 8 jours.",note:5},
+  {nom:"Kouassi Jean-Paul",quartier:"Cocody",montant:"1 500 000 FCFA",duree:"36 mois",profil:"Salarié privé",texte:"Le simulateur m'a montré exactement ce que je pouvais emprunter. Le courtier a négocié un taux que je n'aurais jamais obtenu seul.",note:5},
+  {nom:"Diabaté Mariam",quartier:"Abobo",montant:"500 000 FCFA",duree:"12 mois",profil:"Vendeuse ambulante",texte:"J'avais peur d'aller à la banque seule. Avec CréditPro CI j'étais accompagnée. Ils ont su expliquer mon activité mieux que moi.",note:5},
+];
 
-/* ══ CARDS ══ */
-.card{
-  background:var(--card);
-  border:1px solid var(--card-border);
-  border-radius:20px;padding:28px;
-  position:relative;overflow:hidden;
-}
-.card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(201,168,76,0.15),transparent);
-}
-.card-title{
-  font-size:0.78rem;font-weight:800;color:var(--muted);
-  text-transform:uppercase;letter-spacing:0.07em;margin-bottom:20px;
-  display:flex;align-items:center;gap:8px;
-}
-.ct-ico{
-  width:28px;height:28px;border-radius:8px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:0.88rem;
-}
-.ct-ico.gold{background:rgba(201,168,76,0.15);}
-.ct-ico.green{background:rgba(34,197,94,0.12);}
-.ct-ico.blue{background:rgba(30,144,255,0.12);}
+const ACTU = [
+  {date:"Mars 2025",titre:"Ecobank CI accepte les relevés Mobile Money",resume:"La banque annonce officiellement accepter les historiques MTN MoMo, Orange Money et Wave comme preuve de revenus pour les crédits < 1 million FCFA.",tag:"Crédit"},
+  {date:"Fév 2025",titre:"Taux directeur BCEAO maintenu à 3,5%",resume:"La Banque Centrale stabilise les conditions de crédit dans toute la zone UEMOA pour le premier semestre 2025.",tag:"BCEAO"},
+  {date:"Jan 2025",titre:"Wave Bank Africa : 21 millions de comptes",resume:"La fintech confirme son passage au statut bancaire avec un capital de 20 milliards FCFA — nouvelles perspectives pour l'inclusion financière.",tag:"Fintech"},
+];
 
-/* ══ GRIDS ══ */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-.full{grid-column:1/-1;}
-@media(max-width:680px){.grid2{grid-template-columns:1fr;}.grid3{grid-template-columns:1fr 1fr;}}
-@media(max-width:420px){.grid3{grid-template-columns:1fr;}}
+const AGENCES = [
+  {nom:"Ecobank CI — Plateau",quartier:"Plateau",couleur:"#22C55E",profils:"Informel, Salarié, PME"},
+  {nom:"Banque Atlantique — Yopougon",quartier:"Yopougon",couleur:"#22C55E",profils:"Informel, Commerçant, PME"},
+  {nom:"SGBCI — Plateau",quartier:"Plateau",couleur:GOLD,profils:"Salarié, Fonctionnaire"},
+  {nom:"Ecobank CI — Cocody",quartier:"Cocody",couleur:"#22C55E",profils:"Informel, Salarié, PME"},
+  {nom:"Banque Atlantique — Abobo",quartier:"Abobo",couleur:"#22C55E",profils:"Informel, Commerçant"},
+  {nom:"BICICI — Plateau",quartier:"Plateau",couleur:GOLD,profils:"Salarié, Fonctionnaire"},
+  {nom:"SIB — Marcory",quartier:"Marcory",couleur:"#EAB308",profils:"Salarié, Fonctionnaire"},
+  {nom:"NSIA Banque — Deux Plateaux",quartier:"Deux Plateaux",couleur:"#EAB308",profils:"Salarié, PME"},
+];
 
-/* ══ FIELDS ══ */
-.field{margin-bottom:14px;}
-.field:last-child{margin-bottom:0;}
-label.lbl{
-  display:flex;align-items:center;justify-content:space-between;
-  font-size:0.72rem;font-weight:700;color:var(--muted);
-  text-transform:uppercase;letter-spacing:0.05em;margin-bottom:7px;
-}
-label.lbl .hint{
-  font-weight:500;text-transform:none;letter-spacing:0;
-  color:rgba(106,141,170,0.6);font-size:0.68rem;
-}
-.inp-wrap{position:relative;}
-.inp-pfx{
-  position:absolute;left:14px;top:50%;transform:translateY(-50%);
-  font-size:0.68rem;font-weight:800;color:var(--gold);pointer-events:none;
-}
-input[type=number],input[type=text],input[type=email],input[type=tel],select,textarea{
-  width:100%;background:rgba(4,16,30,0.8);
-  border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;
-  padding:13px 14px 13px 60px;color:#fff;
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:0.95rem;font-weight:600;
-  outline:none;transition:border-color 0.2s,box-shadow 0.2s;
-  -moz-appearance:textfield;
-}
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
-input:focus,select:focus,textarea:focus{
-  border-color:rgba(201,168,76,0.5);
-  box-shadow:0 0 0 3px rgba(201,168,76,0.08);
-}
-input.no-pfx,select.no-pfx,textarea.no-pfx{padding-left:14px;}
-select{cursor:pointer;}
-select option{background:#071628;}
-textarea{resize:vertical;min-height:90px;}
+const st = {
+  body:{minHeight:"100vh",background:NAVY,color:"#EEF2F7",fontFamily:"'Plus Jakarta Sans',sans-serif"},
+  nav:{position:"fixed",top:0,left:0,right:0,zIndex:200,height:64,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 28px",background:"rgba(4,16,30,0.95)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(201,168,76,0.12)"},
+  logoMark:{width:32,height:32,borderRadius:8,background:`linear-gradient(135deg,#B8922A,${GOLD2})`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Georgia,serif",fontSize:"1.1rem",fontWeight:700,color:NAVY,boxShadow:"0 0 16px rgba(201,168,76,0.3)"},
+  btnGold:{padding:"10px 22px",borderRadius:6,fontSize:"0.78rem",fontWeight:800,background:`linear-gradient(135deg,#B8922A,${GOLD})`,color:NAVY,border:"none",cursor:"pointer",letterSpacing:"0.05em",textTransform:"uppercase",boxShadow:"0 4px 20px rgba(201,168,76,0.3)"},
+  btnOutline:{padding:"10px 22px",borderRadius:6,fontSize:"0.78rem",fontWeight:700,background:"transparent",color:GOLD,border:"1px solid rgba(201,168,76,0.35)",cursor:"pointer"},
+  card:{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,padding:22},
+  inp:{width:"100%",background:"rgba(4,16,30,0.8)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"12px 14px",color:"#fff",fontFamily:"inherit",fontSize:"0.9rem",fontWeight:600,outline:"none"},
+  lbl:{display:"block",fontSize:"0.67rem",fontWeight:700,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:6},
+  pill:{padding:"8px 16px",borderRadius:30,border:"1.5px solid rgba(255,255,255,0.1)",color:"#6A8DAA",fontSize:"0.78rem",fontWeight:700,cursor:"pointer",background:"transparent"},
+  pillOn:{padding:"8px 16px",borderRadius:30,border:`1.5px solid ${GOLD}`,background:"rgba(201,168,76,0.1)",color:GOLD,fontSize:"0.78rem",fontWeight:700,cursor:"pointer"},
+  sTitle:{fontFamily:"Georgia,serif",fontSize:"clamp(1.8rem,3.5vw,2.6rem)",fontWeight:700,lineHeight:1.1,marginBottom:12},
+  eyebrow:{display:"flex",alignItems:"center",gap:10,marginBottom:12},
+  eyeLine:{width:22,height:1,background:GOLD},
+  eyeTxt:{fontSize:"0.67rem",fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",color:GOLD},
+};
 
-/* ══ MODE SWITCH ══ */
-.mode-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;}
-.mbtn{
-  display:flex;align-items:center;gap:14px;
-  padding:18px 20px;border-radius:16px;cursor:pointer;
-  border:2px solid rgba(255,255,255,0.07);
-  background:rgba(255,255,255,0.02);transition:all 0.25s;
-}
-.mbtn:hover{border-color:rgba(201,168,76,0.3);}
-.mbtn.active{
-  border-color:var(--gold);
-  background:rgba(201,168,76,0.07);
-}
-.mbtn-ico{font-size:1.8rem;width:44px;text-align:center;flex-shrink:0;}
-.mbtn-txt .mt{font-size:0.92rem;font-weight:800;color:var(--text);}
-.mbtn-txt .md{font-size:0.72rem;color:var(--muted);margin-top:2px;}
-.mbtn.active .mt{color:var(--gold);}
+export default function App() {
+  const [page, setPage] = useState("home");
+  const [profil, setProfil] = useState("salarie");
+  const [duree, setDuree] = useState(null);
+  const [simRes, setSimRes] = useState(null);
+  const [checklist, setChecklist] = useState({});
+  const [dashTab, setDashTab] = useState("apercu");
+  const [suiviCode, setSuiviCode] = useState("");
+  const [suiviRes, setSuiviRes] = useState(null);
+  const canvasRef = useRef(null);
+  const sigDrawing = useRef(false);
+  const sigHas = useRef(false);
+  const lastPos = useRef({x:0,y:0});
 
-/* ══ DURÉE PILLS ══ */
-.dur-row{display:flex;gap:8px;flex-wrap:wrap;}
-.dpill{
-  padding:10px 20px;border-radius:30px;cursor:pointer;
-  border:1.5px solid rgba(255,255,255,0.09);
-  color:var(--muted);font-weight:800;font-size:0.85rem;
-  transition:all 0.2s;white-space:nowrap;
-}
-.dpill:hover{border-color:rgba(201,168,76,0.4);color:var(--text);}
-.dpill.on{background:rgba(201,168,76,0.12);border-color:var(--gold);color:var(--gold);}
+  const scroll = id => { setPage("home"); setTimeout(()=>{ document.getElementById(id)?.scrollIntoView({behavior:"smooth"}); },80); };
 
-/* ══ DEP ROWS ══ */
-.dep-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.dep-row:last-child{margin-bottom:0;}
-.dep-ico{font-size:1rem;width:24px;text-align:center;flex-shrink:0;}
-.dep-lbl{font-size:0.8rem;font-weight:700;color:var(--text);min-width:130px;}
-.dep-row .inp-wrap{flex:1;}
-.dep-row input{font-size:0.85rem;padding:10px 14px 10px 52px;}
+  // Calcul revenu informel
+  const calcRevInformel = () => {
+    const j = parseFloat(document.getElementById("rev-jour")?.value)||0;
+    const h = parseFloat(document.getElementById("rev-hebdo")?.value)||0;
+    const m = parseFloat(document.getElementById("rev-mens-inf")?.value)||0;
+    return j*22 + h*4.3 + m;
+  };
 
-/* ══ REV SOURCES ══ */
-.rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.rev-src{
-  background:rgba(4,16,30,0.6);border:1.5px solid rgba(255,255,255,0.06);
-  border-radius:14px;padding:14px;transition:border-color 0.2s;
-}
-.rev-src:focus-within{border-color:rgba(201,168,76,0.4);}
-.rs-hd{display:flex;align-items:center;gap:7px;margin-bottom:10px;}
-.rs-hd .ico{font-size:1rem;}
-.rs-hd span{font-size:0.75rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;}
-.rev-src input{font-size:0.85rem;padding:10px 14px 10px 50px;}
-.rev-src .inp-pfx{font-size:0.65rem;}
+  const analyser = () => {
+    let rev = 0;
+    if(profil === "informel") {
+      rev = calcRevInformel();
+      if(!rev) return alert("⚠️ Entre au moins un revenu (journalier, hebdomadaire ou mensuel).");
+    } else {
+      rev = parseFloat(document.getElementById("rev-fixe")?.value)||0;
+      if(!rev) return alert("⚠️ Entre ton revenu mensuel net.");
+    }
+    const dep = parseFloat(document.getElementById("sim-dep")?.value)||0;
+    const mont = parseFloat(document.getElementById("sim-mont")?.value)||0;
+    if(!mont||!duree) return alert("⚠️ Entre le montant et sélectionne une durée.");
+    const mens = getMens(mont,duree,0.12);
+    const total = mens*duree;
+    const reste = rev-dep-mens;
+    const tx = (mens/rev)*100;
+    setSimRes({rev,dep,mont,duree,mens,total,int:total-mont,reste,tx,profil});
+  };
 
-/* Mois variable */
-.ptabs{display:flex;gap:6px;margin-bottom:14px;}
-.ptab{
-  padding:6px 14px;border-radius:20px;font-size:0.75rem;font-weight:800;
-  border:1.5px solid rgba(255,255,255,0.09);color:var(--muted);
-  cursor:pointer;transition:all 0.2s;
-}
-.ptab.on{background:rgba(201,168,76,0.12);border-color:var(--gold);color:var(--gold);}
-.mois-manual{display:none;}
-.mois-manual.show{display:block;}
-.mois-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.mbox{
-  border-radius:12px;padding:12px;text-align:center;border:1.5px solid;
-}
-.mbox.bad{border-color:rgba(239,68,68,0.25);background:rgba(239,68,68,0.04);}
-.mbox.ok{border-color:rgba(234,179,8,0.25);background:rgba(234,179,8,0.04);}
-.mbox.good{border-color:rgba(34,197,94,0.25);background:rgba(34,197,94,0.04);}
-.mlabel{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;}
-.mbox.bad .mlabel{color:var(--red);}
-.mbox.ok .mlabel{color:var(--yellow);}
-.mbox.good .mlabel{color:var(--green);}
-.mbox input{font-size:0.82rem;padding:9px 14px 9px 48px;}
-.rev-auto{
-  background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);
-  border-radius:12px;padding:12px 16px;font-size:0.82rem;color:var(--muted);
-  margin-top:6px;
-}
+  useEffect(()=>{
+    if(page==="engagement"&&canvasRef.current){
+      const c=canvasRef.current; const dpr=window.devicePixelRatio||1;
+      c.width=c.offsetWidth*dpr; c.height=130*dpr;
+      const ctx=c.getContext("2d"); ctx.scale(dpr,dpr);
+      ctx.strokeStyle=GOLD; ctx.lineWidth=2.5; ctx.lineCap="round"; ctx.lineJoin="round";
+      const gp=e=>{ const r=c.getBoundingClientRect(); const src=e.touches?e.touches[0]:e; return{x:src.clientX-r.left,y:src.clientY-r.top}; };
+      const draw=p=>{ ctx.beginPath(); ctx.moveTo(lastPos.current.x,lastPos.current.y); ctx.lineTo(p.x,p.y); ctx.stroke(); lastPos.current=p; sigHas.current=true; };
+      c.onmousedown=e=>{sigDrawing.current=true;lastPos.current=gp(e);};
+      c.onmousemove=e=>{if(sigDrawing.current)draw(gp(e));};
+      c.onmouseup=c.onmouseleave=()=>sigDrawing.current=false;
+      c.ontouchstart=e=>{e.preventDefault();sigDrawing.current=true;lastPos.current=gp(e);};
+      c.ontouchmove=e=>{e.preventDefault();if(sigDrawing.current)draw(gp(e));};
+      c.ontouchend=()=>sigDrawing.current=false;
+    }
+  },[page]);
 
-/* ══ CTA PRIMAIRE ══ */
-.btn-primary{
-  width:100%;padding:17px;
-  background:linear-gradient(135deg,#B8922A 0%,var(--gold) 45%,var(--gold2) 100%);
-  border:none;border-radius:14px;color:#04101E;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:1rem;font-weight:900;cursor:pointer;
-  box-shadow:0 6px 30px rgba(201,168,76,0.35);
-  letter-spacing:0.01em;transition:transform 0.2s,box-shadow 0.2s;
-  position:relative;overflow:hidden;
-}
-.btn-primary::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(255,255,255,0.12),transparent);
-}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(201,168,76,0.5);}
-.btn-primary:active{transform:translateY(0);}
+  const clearSig=()=>{ const c=canvasRef.current; if(c){c.getContext("2d").clearRect(0,0,c.width,c.height); sigHas.current=false;} };
 
-/* ══ SECTION SEPARATOR ══ */
-.sep{
-  display:flex;align-items:center;gap:14px;margin:36px 0;
-}
-.sep-line{flex:1;height:1px;background:rgba(255,255,255,0.05);}
-.sep-label{font-size:0.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;}
+  const submitEng = async () => {
+    const nom=document.getElementById("eg-nom")?.value?.trim();
+    const tel=document.getElementById("eg-tel")?.value?.trim();
+    const qrt=document.getElementById("eg-quartier")?.value?.trim();
+    const pro=document.getElementById("eg-profession")?.value?.trim();
+    const prj=document.getElementById("eg-projet")?.value?.trim();
+    if(!nom||!tel||!qrt||!pro||!prj) return alert("⚠️ Remplis tous les champs.");
+    if(!document.getElementById("cb1")?.checked||!document.getElementById("cb2")?.checked||!document.getElementById("cb3")?.checked) return alert("⚠️ Accepte les 3 clauses.");
+    if(!sigHas.current) return alert("⚠️ Signe d'abord.");
+    const num="CP-2026-"+String(Math.floor(Math.random()*9000)+1000);
+    try { await fetch("https://formspree.io/f/mykdaqay",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({"Numéro":num,"Nom":nom,"Téléphone":tel,"Quartier":qrt,"Profession":pro,"Projet":prj,"Montant":simRes?fmt(simRes.mont):"—","Durée":simRes?simRes.duree+" mois":"—","Revenu mensuel":simRes?fmt(simRes.rev):"—","Profil":profil})}); } catch(e){}
+    window._dossierNum=num; setPage("confirmation");
+  };
 
-/* ══════════════════════════════
-   RÉSULTATS
-══════════════════════════════ */
-#results{display:none;padding-top:20px;}
-#results.show{display:block;animation:fadeUp 0.5s ease both;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+  if(page==="dashboard") return <Dashboard dashTab={dashTab} setDashTab={setDashTab} setPage={setPage}/>;
+  if(page==="suivi") return <Suivi suiviCode={suiviCode} setSuiviCode={setSuiviCode} suiviRes={suiviRes} setSuiviRes={setSuiviRes} setPage={setPage}/>;
+  if(page==="engagement") return <Engagement canvasRef={canvasRef} clearSig={clearSig} submitEng={submitEng} setPage={setPage} simRes={simRes}/>;
+  if(page==="confirmation") return <Confirmation setPage={setPage}/>;
 
-/* VERDICT */
-.verdict-bar{
-  display:flex;align-items:center;gap:20px;
-  padding:24px 28px;border-radius:20px;border:1.5px solid;
-  margin-bottom:20px;position:relative;overflow:hidden;
-}
-.verdict-bar::before{
-  content:'';position:absolute;inset:0;opacity:0.04;
-  background:radial-gradient(ellipse at 0% 0%,currentColor,transparent 70%);
-}
-.verdict-bar.green{border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);}
-.verdict-bar.yellow{border-color:rgba(234,179,8,0.4);background:rgba(234,179,8,0.05);}
-.verdict-bar.red{border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.06);}
-.verd-emo{font-size:3rem;line-height:1;flex-shrink:0;}
-.verd-txt h2{font-size:1.3rem;font-weight:900;margin-bottom:4px;}
-.verdict-bar.green .verd-txt h2{color:var(--green);}
-.verdict-bar.yellow .verd-txt h2{color:var(--yellow);}
-.verdict-bar.red .verd-txt h2{color:var(--red);}
-.verd-txt p{font-size:0.88rem;color:var(--muted);line-height:1.55;}
-.verd-right{margin-left:auto;text-align:right;flex-shrink:0;}
-.verd-right .vr-val{font-size:1.8rem;font-weight:900;font-variant-numeric:tabular-nums;}
-.verd-right .vr-lbl{font-size:0.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;}
-.verdict-bar.green .vr-val{color:var(--green);}
-.verdict-bar.yellow .vr-val{color:var(--yellow);}
-.verdict-bar.red .vr-val{color:var(--red);}
-
-/* SCENARIO TABS */
-.sc-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-.sctab{
-  display:flex;align-items:center;gap:7px;
-  padding:9px 18px;border-radius:30px;border:1.5px solid;
-  cursor:pointer;font-weight:800;font-size:0.82rem;transition:all 0.2s;
-}
-.sctab.p{border-color:rgba(239,68,68,0.3);color:rgba(239,68,68,0.6);}
-.sctab.r{border-color:rgba(234,179,8,0.3);color:rgba(234,179,8,0.6);}
-.sctab.o{border-color:rgba(34,197,94,0.3);color:rgba(34,197,94,0.6);}
-.sctab.p.on{background:rgba(239,68,68,0.1);border-color:var(--red);color:var(--red);}
-.sctab.r.on{background:rgba(234,179,8,0.08);border-color:var(--yellow);color:var(--yellow);}
-.sctab.o.on{background:rgba(34,197,94,0.08);border-color:var(--green);color:var(--green);}
-.sctab-dot{width:8px;height:8px;border-radius:50%;background:currentColor;}
-
-/* STATS BOX */
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
-@media(max-width:600px){.stats-grid{grid-template-columns:1fr 1fr;}}
-.sbox{
-  background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);
-  border-radius:14px;padding:16px 14px;text-align:center;
-  position:relative;overflow:hidden;
-}
-.sbox::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,currentColor,transparent);
-  opacity:0.2;
-}
-.sv{font-size:1.1rem;font-weight:900;margin-bottom:4px;font-variant-numeric:tabular-nums;}
-.sl{font-size:0.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;}
-.sv.g{color:var(--green);}
-.sv.r{color:var(--red);}
-.sv.y{color:var(--yellow);}
-.sv.gold{color:var(--gold);}
-.sv.w{color:#fff;}
-
-/* GAUGE */
-.gauge-wrap{margin:6px 0 4px;}
-.gauge-hd{display:flex;justify-content:space-between;font-size:0.78rem;font-weight:700;margin-bottom:7px;}
-.gauge-track{height:12px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden;position:relative;}
-.gauge-fill{height:100%;border-radius:6px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
-.gauge-zones{display:flex;position:absolute;inset:0;opacity:0.15;}
-.gz-green{flex:0 0 30%;background:var(--green);}
-.gz-yellow{flex:0 0 10%;background:var(--yellow);}
-.gz-red{flex:1;background:var(--red);}
-.gauge-ticks{display:flex;justify-content:space-between;font-size:0.62rem;color:var(--muted);margin-top:4px;}
-
-/* BUDGET BAR */
-.bbar{height:28px;border-radius:8px;overflow:hidden;display:flex;margin:10px 0 8px;}
-.bb-seg{
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.63rem;font-weight:800;color:#fff;
-  transition:width 1s cubic-bezier(.4,0,.2,1);overflow:hidden;padding:0 4px;min-width:0;
-}
-.bb-seg.c{background:linear-gradient(90deg,var(--gold),var(--gold2));}
-.bb-seg.d{background:rgba(60,80,110,0.9);}
-.bb-seg.l{background:rgba(34,197,94,0.5);}
-.bleg{display:flex;gap:14px;flex-wrap:wrap;}
-.bl-item{display:flex;align-items:center;gap:6px;font-size:0.7rem;color:var(--muted);}
-.bl-dot{width:10px;height:10px;border-radius:3px;}
-
-/* EXPLAIN */
-.explain-box{
-  background:rgba(201,168,76,0.05);
-  border:1px solid rgba(201,168,76,0.15);
-  border-radius:14px;padding:18px;margin-bottom:14px;
-}
-.explain-box h4{font-size:0.8rem;font-weight:800;color:var(--gold);margin-bottom:10px;letter-spacing:0.02em;}
-.explain-box p{font-size:0.87rem;line-height:1.8;color:var(--text);}
-.explain-box strong{color:var(--gold2);}
-
-/* CONSEILS */
-.clist{list-style:none;}
-.ci{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
-.ci:last-child{border:none;}
-.cico{
-  width:30px;height:30px;min-width:30px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;font-size:0.9rem;
-}
-.cico.ok{background:rgba(34,197,94,0.12);}
-.cico.warn{background:rgba(234,179,8,0.1);}
-.cico.danger{background:rgba(239,68,68,0.1);}
-.ctxt{font-size:0.83rem;line-height:1.65;color:var(--text);}
-.ctxt strong{color:#fff;}
-
-/* BANQUES */
-.bk-row{
-  display:flex;align-items:center;gap:12px;
-  padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.04);flex-wrap:wrap;
-}
-.bk-row:last-child{border:none;}
-.bk-name{font-weight:800;font-size:0.85rem;flex:1;min-width:140px;}
-.bk-rate{font-weight:900;font-size:0.95rem;color:var(--gold);}
-.bk-detail{font-size:0.75rem;color:var(--muted);text-align:right;flex:1;}
-.btag{font-size:0.62rem;padding:3px 10px;border-radius:6px;font-weight:800;text-transform:uppercase;white-space:nowrap;}
-.btag.best{background:rgba(34,197,94,0.15);color:var(--green);}
-.btag.mid{background:rgba(234,179,8,0.1);color:var(--yellow);}
-.btag.high{background:rgba(239,68,68,0.1);color:var(--red);}
-
-/* IRR ALERT */
-.irr-alert-box{
-  background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.2);
-  border-radius:14px;padding:18px;font-size:0.85rem;line-height:1.7;color:var(--text);
-}
-.irr-alert-box strong{color:var(--yellow);}
-
-/* ══════════════════════════════
-   ENGAGEMENT / SIGNATURE
-══════════════════════════════ */
-#engagement-section{display:none;margin-top:40px;}
-#engagement-section.show{display:block;animation:fadeUp 0.5s ease both;}
-.engagement-hero{
-  background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(4,16,30,0.95));
-  border:1.5px solid rgba(201,168,76,0.25);
-  border-radius:24px;padding:36px;margin-bottom:20px;
-  position:relative;overflow:hidden;
-}
-.engagement-hero::before{
-  content:'';position:absolute;top:-40%;right:-10%;
-  width:300px;height:300px;border-radius:50%;
-  background:radial-gradient(circle,rgba(201,168,76,0.06),transparent 70%);
-}
-.engagement-hero .eg-icon{font-size:2.5rem;margin-bottom:16px;}
-.engagement-hero h2{
-  font-size:1.5rem;font-weight:900;margin-bottom:8px;letter-spacing:-0.02em;
-}
-.engagement-hero h2 span{color:var(--gold);}
-.engagement-hero p{color:var(--muted);font-size:0.92rem;line-height:1.6;max-width:540px;}
-
-.engagement-clauses{
-  list-style:none;margin:24px 0 0;display:flex;flex-direction:column;gap:10px;
-}
-.ec{
-  display:flex;align-items:flex-start;gap:12px;
-  background:rgba(4,16,30,0.6);border:1px solid rgba(255,255,255,0.06);
-  border-radius:14px;padding:14px 16px;
-}
-.ec-num{
-  width:24px;height:24px;min-width:24px;border-radius:50%;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));
-  color:#04101E;font-size:0.72rem;font-weight:900;
-  display:flex;align-items:center;justify-content:center;margin-top:1px;
-}
-.ec-txt{font-size:0.83rem;line-height:1.6;color:var(--text);}
-.ec-txt strong{color:var(--gold2);}
-
-/* FORM ENGAGEMENT */
-.engage-form .grid2{gap:14px;}
-.checkbox-row{
-  display:flex;align-items:flex-start;gap:12px;
-  background:rgba(201,168,76,0.05);border:1.5px solid rgba(201,168,76,0.2);
-  border-radius:14px;padding:16px;margin-top:4px;cursor:pointer;
-}
-.checkbox-row input[type=checkbox]{
-  width:20px;height:20px;min-width:20px;padding:0;
-  accent-color:var(--gold);cursor:pointer;margin-top:2px;
-}
-.cb-label{font-size:0.85rem;line-height:1.6;color:var(--text);}
-.cb-label strong{color:var(--gold);}
-
-/* SIGNATURE */
-.sig-wrap{margin-top:16px;}
-.sig-label{font-size:0.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;}
-.sig-canvas-wrap{
-  border:1.5px solid rgba(201,168,76,0.25);border-radius:14px;overflow:hidden;
-  background:rgba(4,16,30,0.9);position:relative;
-}
-#sig-canvas{display:block;width:100%;height:140px;cursor:crosshair;touch-action:none;}
-.sig-tools{display:flex;gap:8px;padding:8px 12px;border-top:1px solid rgba(255,255,255,0.05);align-items:center;}
-.sig-tools .sig-hint{font-size:0.7rem;color:var(--muted);flex:1;}
-.sig-clear{
-  padding:5px 14px;border-radius:8px;font-size:0.72rem;font-weight:800;
-  background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--red);cursor:pointer;
-  font-family:'Plus Jakarta Sans',sans-serif;transition:background 0.2s;
-}
-.sig-clear:hover{background:rgba(239,68,68,0.18);}
-
-/* CONFIRMATION FINALE */
-#confirmation{display:none;margin-top:20px;}
-#confirmation.show{display:block;animation:fadeUp 0.5s ease both;}
-.confirm-card{
-  background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(4,16,30,0.95));
-  border:1.5px solid rgba(34,197,94,0.3);border-radius:24px;padding:40px;text-align:center;
-  position:relative;overflow:hidden;
-}
-.confirm-card::before{
-  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:200px;height:200px;border-radius:50%;
-  background:radial-gradient(circle,rgba(34,197,94,0.08),transparent 70%);
-  pointer-events:none;
-}
-.confirm-ico{font-size:3.5rem;margin-bottom:20px;display:block;}
-.confirm-card h2{font-size:1.6rem;font-weight:900;color:var(--green);margin-bottom:10px;}
-.confirm-card p{color:var(--muted);font-size:0.92rem;line-height:1.7;max-width:480px;margin:0 auto;}
-.dossier-num{
-  display:inline-block;margin:20px 0 10px;
-  background:rgba(34,197,94,0.1);border:1.5px solid rgba(34,197,94,0.25);
-  border-radius:12px;padding:10px 24px;
-  font-size:1.1rem;font-weight:900;color:var(--green);letter-spacing:0.04em;
-  font-variant-numeric:tabular-nums;
-}
-.confirm-steps{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
-  margin:24px 0 0;text-align:left;
-}
-@media(max-width:500px){.confirm-steps{grid-template-columns:1fr;}}
-.cs{
-  background:rgba(4,16,30,0.6);border:1px solid rgba(255,255,255,0.06);
-  border-radius:14px;padding:14px;
-}
-.cs-n{font-size:0.65rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
-.cs-v{font-size:0.82rem;font-weight:700;color:var(--text);line-height:1.5;}
-
-.footer-note{
-  text-align:center;color:var(--muted);font-size:0.72rem;
-  margin-top:50px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.04);
-  line-height:1.7;
-}
-</style>
-</head>
-<body>
-
-<!-- ══ HEADER ══ -->
-<header>
-  <div class="logo-block">
-    <div class="logo-icon">₣</div>
-    <div>
-      <div class="logo-text"><span>CréditPro</span> CI</div>
-      <span class="logo-tagline">Votre Courtier Bancaire</span>
-    </div>
-  </div>
-  <div class="header-right">
-    <div class="badge-courtier">🤝 Accompagnement Personnalisé</div>
-    <div class="header-step-indicator">
-      <div class="hstep active" id="hs1">1</div>
-      <div class="hstep-line"></div>
-      <div class="hstep" id="hs2">2</div>
-      <div class="hstep-line"></div>
-      <div class="hstep" id="hs3">✓</div>
-    </div>
-  </div>
-</header>
-
-<!-- ══ HERO ══ -->
-<div class="hero-section">
-  <div>
-    <div class="hero-eyebrow">✦ Service de courtage certifié CI</div>
-    <h1>Le crédit que tu mérites,<br><em>obtenu ensemble.</em></h1>
-    <p>Je négocie pour toi les meilleurs accords avec les banques ivoiriennes. Pas seul face à la banque — accompagné à chaque étape.</p>
-    <div class="hero-stats">
-      <div class="hstat"><div class="hn">6+</div><div class="hl">Banques partenaires</div></div>
-      <div class="hstat" style="border-left:1px solid rgba(255,255,255,0.06);padding-left:24px"><div class="hn">48h</div><div class="hl">Réponse garantie</div></div>
-      <div class="hstat" style="border-left:1px solid rgba(255,255,255,0.06);padding-left:24px"><div class="hn">100%</div><div class="hl">Accompagné</div></div>
-    </div>
-  </div>
-  <div class="hero-card">
-    <div class="hc-title">Comment ça marche</div>
-    <div class="process-step">
-      <div class="ps-num">1</div>
-      <div class="ps-body">
-        <div class="ps-t">Simulation & Analyse</div>
-        <div class="ps-d">Tu remplis ton profil. On analyse ta capacité réelle de remboursement.</div>
-      </div>
-    </div>
-    <div class="process-step">
-      <div class="ps-num">2</div>
-      <div class="ps-body">
-        <div class="ps-t">Engagement & Dossier</div>
-        <div class="ps-d">Tu t'engages. Je prépare ton dossier selon les critères de chaque banque partenaire.</div>
-      </div>
-    </div>
-    <div class="process-step">
-      <div class="ps-num">3</div>
-      <div class="ps-body">
-        <div class="ps-t">Accompagnement Banque</div>
-        <div class="ps-d">Je t'accompagne physiquement au guichet. Tu n'es jamais seul face aux décideurs.</div>
-      </div>
-    </div>
-    <div class="process-step">
-      <div class="ps-num">4</div>
-      <div class="ps-body">
-        <div class="ps-t">Déblocage des fonds</div>
-        <div class="ps-d">L'accord est signé. Les fonds sont débloqués grâce à nos accords préalables.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ FORMULAIRE ══ -->
-<div class="main-wrap">
-
-  <!-- ÉTAPE 1 : PROFIL -->
-  <div id="step-profil">
-    <div class="step-header">
-      <div class="step-badge">👤</div>
-      <div class="step-hd-text">
-        <div class="step-num">Étape 1 sur 2</div>
-        <h2>Ton profil financier</h2>
-      </div>
-    </div>
-
-    <!-- TYPE DE REVENU -->
-    <div class="mode-row" style="margin-bottom:20px;">
-      <div class="mbtn active" id="mode-sal" onclick="setMode('salarie')">
-        <div class="mbtn-ico">👔</div>
-        <div class="mbtn-txt">
-          <div class="mt">Salarié</div>
-          <div class="md">Revenu fixe mensuel</div>
-        </div>
-      </div>
-      <div class="mbtn" id="mode-com" onclick="setMode('commercant')">
-        <div class="mbtn-ico">🛒</div>
-        <div class="mbtn-txt">
-          <div class="mt">Commerçant / Indépendant</div>
-          <div class="md">Woro-woro, marchand, artisan, vendeur</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FORM SALARIÉ -->
-    <div id="form-salarie">
-      <div class="grid2">
-        <div class="card">
-          <div class="card-title"><div class="ct-ico gold">💰</div>Revenus mensuels</div>
-          <div class="field">
-            <label class="lbl">Salaire net <span class="hint">Ce que tu reçois en main</span></label>
-            <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="s-salaire" placeholder="150 000" min="0"></div>
-          </div>
-          <div class="field">
-            <label class="lbl">Autres revenus <span class="hint">Location, commerce...</span></label>
-            <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="s-autres" placeholder="0" min="0"></div>
+  return (
+    <div style={st.body}>
+      {/* NAV */}
+      <nav style={st.nav}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={st.logoMark}>C</div>
+          <div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:"1.1rem",fontWeight:700}}><span style={{color:GOLD}}>Crédit</span>Pro CI</div>
+            <div style={{fontSize:"0.55rem",fontWeight:600,color:"#6A8DAA",letterSpacing:"0.1em",textTransform:"uppercase"}}>Courtage Bancaire</div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-title"><div class="ct-ico gold">🧾</div>Dépenses mensuelles</div>
-          <div class="dep-row"><span class="dep-ico">🏠</span><span class="dep-lbl">Loyer</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-loyer" placeholder="30 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">🍚</span><span class="dep-lbl">Nourriture</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-nourr" placeholder="25 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">🚌</span><span class="dep-lbl">Transport</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-trans" placeholder="15 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">📱</span><span class="dep-lbl">Téléphone</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-tel" placeholder="5 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">👨‍👩‍👧</span><span class="dep-lbl">Famille</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-fam" placeholder="10 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">➕</span><span class="dep-lbl">Autres</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" class="s-dep" id="s-autre-dep" placeholder="5 000" min="0"></div></div>
+        <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+          {[["simulateur","Simuler"],["checklist","Documents"],["temoignages","Témoignages"],["actualites","Actualités"],["agences","Agences"]].map(([id,label])=>(
+            <button key={id} onClick={()=>scroll(id)} style={{background:"none",border:"none",color:"#6A8DAA",fontSize:"0.72rem",fontWeight:600,cursor:"pointer",letterSpacing:"0.04em",textTransform:"uppercase"}}>{label}</button>
+          ))}
+          <button onClick={()=>setPage("suivi")} style={{...st.btnOutline,padding:"7px 14px",fontSize:"0.7rem"}}>Suivi</button>
+          <button onClick={()=>setPage("dashboard")} style={{...st.btnGold,padding:"7px 14px",fontSize:"0.7rem"}}>Dashboard</button>
         </div>
-        <div class="card full">
-          <div class="card-title"><div class="ct-ico blue">🏦</div>Le crédit souhaité</div>
-          <div class="grid2" style="gap:16px">
-            <div class="field">
-              <label class="lbl">Montant à emprunter</label>
-              <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="s-montant" placeholder="500 000" min="0"></div>
+      </nav>
+
+      {/* HERO */}
+      <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",padding:"100px 28px 60px",background:"radial-gradient(ellipse 80% 50% at 50% 0%,rgba(201,168,76,0.06),transparent 60%)"}}>
+        <div style={{maxWidth:1000,margin:"0 auto",width:"100%"}}>
+          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Côte d'Ivoire · Courtage Bancaire · 2025</div></div>
+          <h1 style={{fontFamily:"Georgia,serif",fontSize:"clamp(2.6rem,6vw,4.8rem)",fontWeight:700,lineHeight:1.05,letterSpacing:"-0.02em",marginBottom:16}}>
+            L'accès au crédit,<br/>
+            <span style={{color:"transparent",WebkitTextStroke:"1px rgba(201,168,76,0.5)"}}>démocratisé.</span><br/>
+            <span style={{color:GOLD}}>Pour tous les Ivoiriens.</span>
+          </h1>
+          <p style={{color:"#6A8DAA",fontSize:"1rem",lineHeight:1.8,maxWidth:500,marginBottom:36}}>Salarié, fonctionnaire, commerçant ou entrepreneur — je prépare ton dossier, je négocie pour toi et je t'accompagne physiquement en banque.</p>
+          <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:56}}>
+            <button style={st.btnGold} onClick={()=>scroll("simulateur")}>Simuler mon crédit</button>
+            <button style={st.btnOutline} onClick={()=>setPage("suivi")}>Suivre mon dossier →</button>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",border:"1px solid rgba(201,168,76,0.15)",borderRadius:12,overflow:"hidden"}}>
+            {[["32M","Habitants CI 2024"],["11–12M","Travailleurs informels"],["<10%","Informels avec crédit"],["80%","Taux succès visé"]].map(([v,l])=>(
+              <div key={l} style={{padding:"22px 14px",textAlign:"center",borderRight:"1px solid rgba(201,168,76,0.1)",background:"rgba(201,168,76,0.03)"}}>
+                <div style={{fontFamily:"Georgia,serif",fontSize:"1.9rem",fontWeight:700,color:GOLD,marginBottom:5}}>{v}</div>
+                <div style={{fontSize:"0.62rem",fontWeight:700,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.07em",lineHeight:1.4}}>{l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* SIMULATEUR */}
+      <div id="simulateur" style={{padding:"70px 28px",background:"rgba(6,21,37,0.9)"}}>
+        <div style={{maxWidth:800,margin:"0 auto"}}>
+          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Simulation crédit</div></div>
+          <h2 style={{...st.sTitle,marginBottom:28}}>Sache ce que tu peux <span style={{color:GOLD}}>vraiment</span> emprunter</h2>
+          <div style={{...st.card,border:"1px solid rgba(201,168,76,0.2)"}}>
+
+            {/* CHOIX PROFIL */}
+            <label style={st.lbl}>Ton profil</label>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:22}}>
+              {[["salarie","👔","Salarié"],["fonctionnaire","🏛️","Fonctionnaire"],["informel","🛒","Commerçant / Informel"],["pme","🏢","PME / Entrepreneur"]].map(([v,ico,label])=>(
+                <div key={v} onClick={()=>{setProfil(v);setSimRes(null);}} style={{padding:"14px 8px",borderRadius:12,border:`2px solid ${profil===v?GOLD:"rgba(255,255,255,0.08)"}`,background:profil===v?"rgba(201,168,76,0.08)":"transparent",cursor:"pointer",textAlign:"center",transition:"all 0.2s"}}>
+                  <div style={{fontSize:"1.4rem",marginBottom:6}}>{ico}</div>
+                  <div style={{fontSize:"0.72rem",fontWeight:800,color:profil===v?GOLD:"#6A8DAA",lineHeight:1.3}}>{label}</div>
+                </div>
+              ))}
             </div>
-            <div class="field">
-              <label class="lbl">Durée de remboursement</label>
-              <div class="dur-row">
-                <div class="dpill" onclick="selDuree('s',6,this)">6 mois</div>
-                <div class="dpill" onclick="selDuree('s',12,this)">12 mois</div>
-                <div class="dpill" onclick="selDuree('s',24,this)">24 mois</div>
-                <div class="dpill" onclick="selDuree('s',36,this)">36 mois</div>
+
+            {/* REVENUS SELON PROFIL */}
+            {profil === "informel" ? (
+              <div style={{background:"rgba(201,168,76,0.05)",border:"1px solid rgba(201,168,76,0.15)",borderRadius:12,padding:18,marginBottom:16}}>
+                <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:4}}>💡 Revenus irréguliers — entre ce que tu gagnes</div>
+                <div style={{fontSize:"0.75rem",color:"#6A8DAA",marginBottom:16,lineHeight:1.6}}>Tu n'as pas besoin d'un revenu fixe. Entre ce que tu gagnes en moyenne. On calculera ton revenu mensuel estimé automatiquement.</div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
+                  <div>
+                    <label style={st.lbl}>Par jour ☀️ <span style={{fontSize:"0.6rem",color:"#4A6A85",textTransform:"none"}}>× 22 jours</span></label>
+                    <input id="rev-jour" type="number" style={st.inp} placeholder="5 000" onChange={()=>{
+                      const j=parseFloat(document.getElementById("rev-jour")?.value)||0;
+                      const h=parseFloat(document.getElementById("rev-hebdo")?.value)||0;
+                      const m=parseFloat(document.getElementById("rev-mens-inf")?.value)||0;
+                      const t=j*22+h*4.3+m;
+                      const el=document.getElementById("rev-estime");
+                      if(el) el.textContent=t>0?fmt(t):"—";
+                    }}/>
+                  </div>
+                  <div>
+                    <label style={st.lbl}>Par semaine 📅 <span style={{fontSize:"0.6rem",color:"#4A6A85",textTransform:"none"}}>× 4.3</span></label>
+                    <input id="rev-hebdo" type="number" style={st.inp} placeholder="30 000" onChange={()=>{
+                      const j=parseFloat(document.getElementById("rev-jour")?.value)||0;
+                      const h=parseFloat(document.getElementById("rev-hebdo")?.value)||0;
+                      const m=parseFloat(document.getElementById("rev-mens-inf")?.value)||0;
+                      const t=j*22+h*4.3+m;
+                      const el=document.getElementById("rev-estime");
+                      if(el) el.textContent=t>0?fmt(t):"—";
+                    }}/>
+                  </div>
+                  <div>
+                    <label style={st.lbl}>Par mois 📆 <span style={{fontSize:"0.6rem",color:"#4A6A85",textTransform:"none"}}>fixe</span></label>
+                    <input id="rev-mens-inf" type="number" style={st.inp} placeholder="120 000" onChange={()=>{
+                      const j=parseFloat(document.getElementById("rev-jour")?.value)||0;
+                      const h=parseFloat(document.getElementById("rev-hebdo")?.value)||0;
+                      const m=parseFloat(document.getElementById("rev-mens-inf")?.value)||0;
+                      const t=j*22+h*4.3+m;
+                      const el=document.getElementById("rev-estime");
+                      if(el) el.textContent=t>0?fmt(t):"—";
+                    }}/>
+                  </div>
+                </div>
+                <div style={{marginTop:12,display:"flex",alignItems:"center",gap:8,background:"rgba(34,197,94,0.07)",borderRadius:8,padding:"10px 14px"}}>
+                  <span style={{fontSize:"0.78rem",color:"#6A8DAA"}}>Revenu mensuel estimé :</span>
+                  <span id="rev-estime" style={{fontWeight:800,color:"#22C55E",fontSize:"0.88rem"}}>—</span>
+                </div>
+              </div>
+            ) : (
+              <div style={{marginBottom:16}}>
+                <label style={st.lbl}>Revenu mensuel net {profil==="pme"?"(chiffre d'affaires moyen)":""}</label>
+                <input id="rev-fixe" type="number" style={st.inp} placeholder={profil==="fonctionnaire"?"250 000":profil==="pme"?"800 000":"200 000"}/>
+              </div>
+            )}
+
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:16}}>
+              <div>
+                <label style={st.lbl}>Dépenses mensuelles</label>
+                <input id="sim-dep" type="number" style={st.inp} placeholder="80 000"/>
+              </div>
+              <div>
+                <label style={st.lbl}>Montant souhaité</label>
+                <input id="sim-mont" type="number" style={st.inp} placeholder="500 000"/>
+              </div>
+            </div>
+
+            <div style={{marginBottom:18}}>
+              <label style={st.lbl}>Durée de remboursement</label>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {[6,12,24,36].map(d=>(
+                  <button key={d} onClick={()=>setDuree(d)} style={duree===d?st.pillOn:st.pill}>{d} mois</button>
+                ))}
+              </div>
+            </div>
+
+            <button style={{...st.btnGold,width:"100%",padding:14,fontSize:"0.88rem"}} onClick={analyser}>🔍 Analyser mon dossier</button>
+
+            {simRes && <SimResults res={simRes} setPage={setPage}/>}
+          </div>
+        </div>
+      </div>
+
+      {/* CHECKLIST */}
+      <div id="checklist" style={{padding:"70px 28px"}}>
+        <div style={{maxWidth:1000,margin:"0 auto"}}>
+          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Prépare ton dossier</div></div>
+          <h2 style={{...st.sTitle,marginBottom:8}}>Checklist <span style={{color:GOLD}}>documents</span></h2>
+          <p style={{color:"#6A8DAA",marginBottom:24,fontSize:"0.88rem"}}>Coche les documents que tu as déjà. Quand tout est coché, ton dossier est prêt.</p>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+            {Object.entries(DOCS).map(([type,docs])=>{
+              const labels={salarie:"👔 Salarié",fonctionnaire:"🏛️ Fonctionnaire",informel:"🛒 Commerçant / Informel",pme:"🏢 PME / Entrepreneur"};
+              const done=docs.filter((_,i)=>checklist[type+i]).length;
+              return (
+                <div key={type} style={st.card}>
+                  <div style={{fontSize:"0.72rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:14}}>{labels[type]}</div>
+                  {docs.map((d,i)=>{
+                    const k=type+i;
+                    return (
+                      <div key={k} onClick={()=>setChecklist(p=>({...p,[k]:!p[k]}))} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.04)",cursor:"pointer"}}>
+                        <div style={{width:18,height:18,minWidth:18,borderRadius:4,border:`1.5px solid ${checklist[k]?"#22C55E":"rgba(255,255,255,0.15)"}`,background:checklist[k]?"rgba(34,197,94,0.15)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.7rem",color:"#22C55E",flexShrink:0}}>{checklist[k]?"✓":""}</div>
+                        <span style={{fontSize:"0.78rem",color:checklist[k]?"#22C55E":"#EEF2F7",textDecoration:checklist[k]?"line-through":"none"}}>{d}</span>
+                      </div>
+                    );
+                  })}
+                  <div style={{marginTop:12,background:"rgba(34,197,94,0.06)",borderRadius:8,padding:"8px 12px",fontSize:"0.73rem",color:"#6A8DAA"}}>
+                    ✅ <strong style={{color:"#22C55E"}}>{done}/{docs.length}</strong> documents prêts {done===docs.length&&done>0?"🎉 Dossier complet !":""}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* TÉMOIGNAGES */}
+      <div id="temoignages" style={{padding:"70px 28px",background:"rgba(6,21,37,0.9)"}}>
+        <div style={{maxWidth:1000,margin:"0 auto"}}>
+          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Ils ont obtenu leur crédit</div></div>
+          <h2 style={{...st.sTitle,marginBottom:28}}>Ce que disent <span style={{color:GOLD}}>nos clients</span></h2>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
+            {TEMOIGNAGES.map((t,i)=>(
+              <div key={i} style={{...st.card,borderColor:"rgba(201,168,76,0.15)"}}>
+                <div style={{marginBottom:12}}>{"⭐".repeat(t.note)}</div>
+                <p style={{fontSize:"0.84rem",lineHeight:1.7,color:"#EEF2F7",marginBottom:16,fontStyle:"italic"}}>"{t.texte}"</p>
+                <div style={{borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:12}}>
+                  <div style={{fontWeight:800,fontSize:"0.86rem"}}>{t.nom}</div>
+                  <div style={{fontSize:"0.7rem",color:"#6A8DAA",marginTop:2}}>{t.profil} · {t.quartier}</div>
+                  <div style={{marginTop:8,display:"flex",gap:6}}>
+                    <span style={{fontSize:"0.65rem",padding:"2px 8px",borderRadius:5,background:"rgba(34,197,94,0.1)",color:"#22C55E",fontWeight:800}}>{t.montant}</span>
+                    <span style={{fontSize:"0.65rem",padding:"2px 8px",borderRadius:5,background:"rgba(201,168,76,0.1)",color:GOLD,fontWeight:800}}>{t.duree}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p style={{textAlign:"center",marginTop:16,fontSize:"0.7rem",color:"#4A6A85",fontStyle:"italic"}}>* Témoignages illustratifs — à remplacer par tes vrais clients</p>
+        </div>
+      </div>
+
+      {/* ACTUALITÉS */}
+      <div id="actualites" style={{padding:"70px 28px"}}>
+        <div style={{maxWidth:1000,margin:"0 auto"}}>
+          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Actualités financières CI</div></div>
+          <h2 style={{...st.sTitle,marginBottom:28}}>Rester <span style={{color:GOLD}}>informé</span></h2>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
+            {ACTU.map((a,i)=>(
+              <div key={i} style={{...st.card,cursor:"pointer"}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                  <span style={{fontSize:"0.62rem",padding:"3px 10px",borderRadius:20,background:"rgba(201,168,76,0.1)",color:GOLD,fontWeight:800,textTransform:"uppercase"}}>{a.tag}</span>
+                  <span style={{fontSize:"0.66rem",color:"#6A8DAA"}}>{a.date}</span>
+                </div>
+                <h4 style={{fontSize:"0.88rem",fontWeight:800,lineHeight:1.4,marginBottom:8}}>{a.titre}</h4>
+                <p style={{fontSize:"0.76rem",color:"#6A8DAA",lineHeight:1.65}}>{a.resume}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* AGENCES */}
+      <div id="agences" style={{padding:"70px 28px",background:"rgba(6,21,37,0.9)"}}>
+        <div style={{maxWidth:1000,margin:"0 auto"}}>
+          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Agences partenaires</div></div>
+          <h2 style={{...st.sTitle,marginBottom:8}}>Agences <span style={{color:GOLD}}>bancaires</span> à Abidjan</h2>
+          <p style={{color:"#6A8DAA",marginBottom:24,fontSize:"0.86rem"}}>Tu n'iras jamais seul. Je t'accompagne dans l'agence la plus proche de toi.</p>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1.4fr",gap:16,alignItems:"start"}}>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {AGENCES.map((a,i)=>(
+                <div key={i} style={{...st.card,display:"flex",alignItems:"center",gap:12,padding:"12px 16px"}}>
+                  <div style={{width:9,height:9,borderRadius:"50%",background:a.couleur,boxShadow:`0 0 8px ${a.couleur}`,flexShrink:0}}></div>
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:800,fontSize:"0.82rem"}}>{a.nom}</div>
+                    <div style={{fontSize:"0.68rem",color:"#6A8DAA",marginTop:1}}>{a.profils}</div>
+                  </div>
+                  <button onClick={()=>window.open(`https://www.google.com/maps/search/${encodeURIComponent(a.nom+" Abidjan")}`)} style={{padding:"4px 10px",borderRadius:6,background:"rgba(201,168,76,0.1)",border:"1px solid rgba(201,168,76,0.2)",color:GOLD,fontSize:"0.65rem",fontWeight:800,cursor:"pointer"}}>Voir →</button>
+                </div>
+              ))}
+            </div>
+            <div style={{...st.card,background:"rgba(201,168,76,0.04)",border:"1px solid rgba(201,168,76,0.2)",padding:26}}>
+              <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:16}}>Quelle banque selon ton profil ?</div>
+              {[{p:"👔 Salarié / Fonctionnaire",b:"SGBCI, BICICI, SIB",c:"rgba(201,168,76,0.08)"},{p:"🛒 Commerçant / Informel",b:"Ecobank CI, Banque Atlantique",c:"rgba(34,197,94,0.06)"},{p:"🏢 PME / Entrepreneur",b:"Banque Atlantique, NSIA, BNI + FGCI",c:"rgba(30,144,255,0.06)"}].map((r,i)=>(
+                <div key={i} style={{background:r.c,borderRadius:10,padding:"12px 14px",marginBottom:8}}>
+                  <div style={{fontWeight:800,fontSize:"0.82rem",marginBottom:3}}>{r.p}</div>
+                  <div style={{fontSize:"0.75rem",color:"#6A8DAA"}}>{r.b}</div>
+                </div>
+              ))}
+              <div style={{marginTop:14,padding:"12px 14px",background:"rgba(37,211,102,0.06)",border:"1px solid rgba(37,211,102,0.15)",borderRadius:10,fontSize:"0.78rem",lineHeight:1.6}}>
+                💬 <strong style={{color:"#25D366"}}>Tu hésites ?</strong> Contacte-moi sur WhatsApp — je t'oriente vers la bonne agence.
               </div>
             </div>
           </div>
-          <button class="btn-primary" onclick="analyserSalarie()">🔍 Analyser ma capacité de remboursement</button>
         </div>
       </div>
-    </div>
 
-    <!-- FORM COMMERÇANT -->
-    <div id="form-commercant" style="display:none">
-      <div class="grid2">
-        <div class="card">
-          <div class="card-title"><div class="ct-ico green">📈</div>Tes revenus</div>
-          <div class="rev-grid">
-            <div class="rev-src">
-              <div class="rs-hd"><span class="ico">☀️</span><span>Par jour</span></div>
-              <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-jour" placeholder="5 000" min="0" oninput="calcRev()"></div>
-              <div style="font-size:0.65rem;color:var(--muted);margin-top:5px;font-weight:600;">× 22 jours / mois</div>
-            </div>
-            <div class="rev-src">
-              <div class="rs-hd"><span class="ico">📅</span><span>Par semaine</span></div>
-              <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-semaine" placeholder="30 000" min="0" oninput="calcRev()"></div>
-              <div style="font-size:0.65rem;color:var(--muted);margin-top:5px;font-weight:600;">× 4.3 / mois</div>
-            </div>
+      {/* FOOTER */}
+      <footer style={{padding:"36px 28px",borderTop:"1px solid rgba(255,255,255,0.05)",textAlign:"center"}}>
+        <div style={{fontFamily:"Georgia,serif",fontSize:"1.1rem",fontWeight:700,marginBottom:8}}><span style={{color:GOLD}}>Crédit</span>Pro CI</div>
+        <p style={{fontSize:"0.7rem",color:"#4A6A85",lineHeight:1.7}}>Service de courtage bancaire · Abidjan, Côte d'Ivoire · 2025<br/>Taux indicatifs — consultez votre conseiller avant toute décision.</p>
+      </footer>
+
+      {/* WHATSAPP */}
+      <div onClick={()=>window.open("https://wa.me/2250700000000?text=Bonjour%20CréditPro%20CI,%20je%20voudrais%20des%20informations.")} style={{position:"fixed",bottom:24,right:24,zIndex:300,width:54,height:54,borderRadius:"50%",background:"#25D366",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(37,211,102,0.4)",cursor:"pointer",fontSize:"1.5rem"}}>💬</div>
+    </div>
+  );
+}
+
+function SimResults({res, setPage}) {
+  const {mens,total,int:interet,reste,tx,profil,mont,duree} = res;
+  const clr = tx<30&&reste>0?"#22C55E":tx<40&&reste>0?"#EAB308":"#EF4444";
+  const banquesFiltrees = BANKS.filter(b=>b.profiles.includes(profil));
+  return (
+    <div style={{marginTop:22,paddingTop:22,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:14}}>
+        {[[fmt(mens),"Mensualité",GOLD],[fmt(reste),"Reste / mois",reste>0?"#22C55E":"#EF4444"],[fmt(total),"Total remboursé","#fff"],[fmt(interet),"Intérêts",GOLD],[pct(tx),"Taux endettement",clr],[tx<30?"Faible ✅":tx<40?"Moyen ⚠️":"Élevé 🚫","Niveau risque",clr]].map(([v,l,c])=>(
+          <div key={l} style={{background:"rgba(4,16,30,0.8)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"12px 10px",textAlign:"center"}}>
+            <div style={{fontFamily:"Georgia,serif",fontSize:"1.1rem",fontWeight:700,color:c,marginBottom:3}}>{v}</div>
+            <div style={{fontSize:"0.6rem",fontWeight:700,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.05em"}}>{l}</div>
           </div>
-          <div class="field">
-            <label class="lbl">Autre revenu fixe mensuel</label>
-            <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-autre-rev" placeholder="0" min="0" oninput="calcRev()"></div>
-          </div>
-          <div class="ptabs">
-            <div class="ptab on" onclick="toggleMois(false,this)">Automatique</div>
-            <div class="ptab" onclick="toggleMois(true,this)">Je saisis moi-même</div>
-          </div>
-          <div class="mois-manual" id="mois-manual">
-            <div class="mois-row">
-              <div class="mbox bad"><div class="mlabel">😟 Mauvais</div><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-pire" placeholder="60 000" min="0"></div></div>
-              <div class="mbox ok"><div class="mlabel">😐 Normal</div><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-moyen" placeholder="120 000" min="0"></div></div>
-              <div class="mbox good"><div class="mlabel">😁 Bon</div><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-bon" placeholder="180 000" min="0"></div></div>
-            </div>
-          </div>
-          <div class="rev-auto" id="rev-auto">💡 Revenu estimé : <strong id="rev-calc" style="color:var(--green)">—</strong></div>
+        ))}
+      </div>
+
+      {/* Verdict */}
+      <div style={{padding:"14px 16px",borderRadius:10,border:`1px solid ${clr}33`,background:`${clr}0A`,display:"flex",gap:12,alignItems:"center",marginBottom:14}}>
+        <span style={{fontSize:"1.6rem"}}>{tx<30&&reste>0?"✅":tx<40&&reste>0?"⚠️":"🚫"}</span>
+        <div>
+          <div style={{fontWeight:800,color:clr,fontSize:"0.92rem",marginBottom:3}}>{tx<30&&reste>0?"Dossier Finançable":tx<40&&reste>0?"Dossier à Optimiser":reste<=0?"Dossier Non Finançable":"Dossier Très Risqué"}</div>
+          <div style={{fontSize:"0.75rem",color:"#6A8DAA"}}>{tx<30&&reste>0?"Ton profil est solide. Je peux défendre ce dossier auprès de nos banques partenaires.":tx<40&&reste>0?"Possible mais limite. On va renforcer quelques points du dossier ensemble.":"Trop risqué. Réduisons le montant ou allongeons la durée."}</div>
         </div>
-        <div class="card">
-          <div class="card-title"><div class="ct-ico gold">🧾</div>Dépenses mensuelles</div>
-          <div class="dep-row"><span class="dep-ico">🏠</span><span class="dep-lbl">Loyer</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-loyer" placeholder="25 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">📦</span><span class="dep-lbl">Stock</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-stock" placeholder="30 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">🍚</span><span class="dep-lbl">Nourriture</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-nourr" placeholder="20 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">🚌</span><span class="dep-lbl">Transport</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-trans" placeholder="15 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">📱</span><span class="dep-lbl">Téléphone</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-tel" placeholder="5 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">👨‍👩‍👧</span><span class="dep-lbl">Famille</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-fam" placeholder="10 000" min="0"></div></div>
-          <div class="dep-row"><span class="dep-ico">➕</span><span class="dep-lbl">Autres</span><div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-autre-dep" placeholder="5 000" min="0"></div></div>
+      </div>
+
+      {/* Jauge */}
+      <div style={{marginBottom:16}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:"0.72rem",fontWeight:700,marginBottom:5}}><span>Taux d'endettement</span><span style={{color:clr}}>{pct(tx)}</span></div>
+        <div style={{height:9,background:"rgba(255,255,255,0.05)",borderRadius:5,overflow:"hidden"}}>
+          <div style={{height:"100%",width:`${Math.min(tx,100)}%`,background:clr,borderRadius:5,transition:"width 1s"}}></div>
         </div>
-        <div class="card full">
-          <div class="card-title"><div class="ct-ico blue">🏦</div>Le crédit souhaité</div>
-          <div class="grid2" style="gap:16px">
-            <div class="field">
-              <label class="lbl">Montant à emprunter</label>
-              <div class="inp-wrap"><span class="inp-pfx">FCFA</span><input type="number" id="c-montant" placeholder="300 000" min="0"></div>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:"0.6rem",color:"#6A8DAA",marginTop:3}}><span>✅ &lt;30%</span><span>⚠️ 30–40%</span><span>🚫 &gt;40%</span></div>
+      </div>
+
+      {/* Banques filtrées selon profil */}
+      <div style={{marginBottom:14}}>
+        <div style={{fontSize:"0.63rem",fontWeight:800,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Banques recommandées pour ton profil</div>
+        {banquesFiltrees.map((b,i)=>{
+          const m=getMens(mont,duree,b.t/100);
+          const tc={best:"#22C55E",mid:"#EAB308",high:"#EF4444"}[b.tag];
+          return (
+            <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.04)",flexWrap:"wrap"}}>
+              <div style={{flex:1,minWidth:130}}>
+                <div style={{fontWeight:700,fontSize:"0.8rem"}}>🏦 {b.n}</div>
+                <div style={{fontSize:"0.63rem",color:"#6A8DAA",marginTop:1}}>{b.q}</div>
+              </div>
+              <div style={{fontWeight:800,color:GOLD,fontSize:"0.82rem"}}>{b.t}%</div>
+              <div style={{fontSize:"0.7rem",color:"#6A8DAA",textAlign:"right"}}>{fmt(m)}/mois</div>
+              <span style={{fontSize:"0.58rem",padding:"2px 7px",borderRadius:4,background:`${tc}18`,color:tc,fontWeight:800,textTransform:"uppercase"}}>{b.tag==="best"?"Top":b.tag==="mid"?"Moyen":"Élevé"}</span>
             </div>
-            <div class="field">
-              <label class="lbl">Durée</label>
-              <div class="dur-row">
-                <div class="dpill" onclick="selDuree('c',6,this)">6 mois</div>
-                <div class="dpill" onclick="selDuree('c',12,this)">12 mois</div>
-                <div class="dpill" onclick="selDuree('c',24,this)">24 mois</div>
-                <div class="dpill" onclick="selDuree('c',36,this)">36 mois</div>
+          );
+        })}
+        <div style={{fontSize:"0.65rem",color:"#4A6A85",fontStyle:"italic",marginTop:6,padding:"7px 10px",background:"rgba(201,168,76,0.04)",borderRadius:6}}>⚠️ Taux indicatifs 2025 — les conditions réelles varient. CréditPro CI négocie les meilleures conditions pour chaque dossier.</div>
+      </div>
+
+      {/* Docs */}
+      <div style={{marginBottom:18}}>
+        <div style={{fontSize:"0.63rem",fontWeight:800,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Documents à préparer — {profil==="informel"?"Commerçant / Informel":profil==="pme"?"PME / Entrepreneur":profil==="fonctionnaire"?"Fonctionnaire":"Salarié"}</div>
+        {DOCS[profil].map((d,i)=>(
+          <div key={i} style={{display:"flex",gap:8,padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,0.04)",fontSize:"0.78rem"}}>{d}</div>
+        ))}
+      </div>
+
+      <button style={{...st.btnGold,width:"100%",padding:13,fontSize:"0.85rem"}} onClick={()=>setPage("engagement")}>🤝 Prendre mon engagement &amp; être accompagné →</button>
+    </div>
+  );
+}
+
+function Engagement({canvasRef, clearSig, submitEng, setPage, simRes}) {
+  return (
+    <div style={{...st.body,paddingTop:30}}>
+      <div style={{maxWidth:720,margin:"0 auto",padding:"36px 22px"}}>
+        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:"#6A8DAA",cursor:"pointer",marginBottom:20,fontSize:"0.8rem"}}>← Retour</button>
+        <h2 style={{...st.sTitle,marginBottom:8}}>Mon <span style={{color:GOLD}}>engagement</span></h2>
+        <p style={{color:"#6A8DAA",marginBottom:24,lineHeight:1.7,fontSize:"0.86rem"}}>En signant, tu acceptes les conditions d'accompagnement. Je m'engage à défendre ton dossier auprès des banques partenaires.</p>
+        <div style={{...st.card,border:"1px solid rgba(201,168,76,0.2)",marginBottom:14}}>
+          <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:14}}>Les 5 clauses d'engagement</div>
+          {["Je fournis des informations exactes et complètes. Toute fausse déclaration annule l'accompagnement.","Je prépare les documents demandés dans les délais convenus avec mon courtier.","Je m'engage à rembourser selon l'échéancier. En cas de difficulté je contacte immédiatement mon courtier.","J'honore les rendez-vous bancaires fixés et me présente avec tous les documents complets.","Les frais de courtage sont réglés uniquement si le crédit est obtenu. Zéro frais si échec."].map((c,i)=>(
+            <div key={i} style={{display:"flex",gap:12,padding:"11px 0",borderBottom:i<4?"1px solid rgba(255,255,255,0.05)":"none"}}>
+              <div style={{width:22,height:22,minWidth:22,borderRadius:"50%",background:`linear-gradient(135deg,#B8922A,${GOLD2})`,color:NAVY,fontSize:"0.7rem",fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{i+1}</div>
+              <span style={{fontSize:"0.82rem",lineHeight:1.6}}>{c}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{...st.card,marginBottom:14}}>
+          <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:14}}>Tes informations personnelles</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            {[["eg-nom","text","Prénom & Nom","Kouassi Jean-Michel"],["eg-tel","tel","WhatsApp","+225 07 XX XX XX XX"],["eg-quartier","text","Quartier / Commune","Yopougon, Cocody..."],["eg-profession","text","Profession","Commerçant, Agent..."]].map(([id,type,label,ph])=>(
+              <div key={id}><label style={st.lbl}>{label}</label><input id={id} type={type} style={st.inp} placeholder={ph}/></div>
+            ))}
+            <div style={{gridColumn:"1/-1"}}>
+              <label style={st.lbl}>Projet — pourquoi ce crédit ?</label>
+              <textarea id="eg-projet" style={{...st.inp,minHeight:76,resize:"vertical"}} placeholder="Acheter du stock, équipement, financer un projet..."/>
+            </div>
+          </div>
+        </div>
+        <div style={{...st.card,marginBottom:14}}>
+          <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:14}}>Acceptation</div>
+          {[["cb1","Je confirme que toutes mes informations financières sont exactes et correspondent à ma situation réelle."],["cb2","J'accepte les 5 clauses d'engagement et je m'engage à les respecter intégralement."],["cb3","J'autorise CréditPro CI à transmettre mon dossier aux banques partenaires dans le cadre de ma demande."]].map(([id,label],i)=>(
+            <div key={id} style={{display:"flex",gap:12,padding:"11px 0",borderBottom:i<2?"1px solid rgba(255,255,255,0.05)":"none",cursor:"pointer"}} onClick={()=>{const c=document.getElementById(id);if(c)c.checked=!c.checked;}}>
+              <input type="checkbox" id={id} style={{width:18,height:18,minWidth:18,accentColor:GOLD,marginTop:2,cursor:"pointer"}}/>
+              <label htmlFor={id} style={{fontSize:"0.82rem",lineHeight:1.6,cursor:"pointer"}}>{label}</label>
+            </div>
+          ))}
+        </div>
+        <div style={{...st.card,marginBottom:18}}>
+          <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:10}}>Signature électronique</div>
+          <p style={{fontSize:"0.75rem",color:"#6A8DAA",marginBottom:10}}>Signe avec ton doigt (mobile) ou ta souris (ordinateur).</p>
+          <div style={{border:"1.5px solid rgba(201,168,76,0.25)",borderRadius:10,overflow:"hidden",background:"rgba(4,16,30,0.9)"}}>
+            <canvas ref={canvasRef} style={{display:"block",width:"100%",height:128,cursor:"crosshair",touchAction:"none"}}/>
+            <div style={{display:"flex",alignItems:"center",padding:"7px 12px",borderTop:"1px solid rgba(255,255,255,0.05)"}}>
+              <span style={{fontSize:"0.68rem",color:"#6A8DAA",flex:1}}>✍️ Dessine ta signature ici</span>
+              <button onClick={clearSig} style={{padding:"4px 10px",borderRadius:5,fontSize:"0.68rem",fontWeight:800,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)",color:"#EF4444",cursor:"pointer"}}>Effacer</button>
+            </div>
+          </div>
+        </div>
+        <button style={{...st.btnGold,width:"100%",padding:15,fontSize:"0.92rem"}} onClick={submitEng}>📋 Valider mon engagement &amp; Soumettre mon dossier</button>
+      </div>
+    </div>
+  );
+}
+
+function Confirmation({setPage}) {
+  const num = window._dossierNum||"CP-2026-XXXX";
+  return (
+    <div style={{...st.body,display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:22}}>
+      <div style={{maxWidth:540,width:"100%",textAlign:"center",background:"rgba(34,197,94,0.06)",border:"1.5px solid rgba(34,197,94,0.25)",borderRadius:22,padding:44}}>
+        <div style={{fontSize:"3.2rem",marginBottom:18}}>🎉</div>
+        <h2 style={{fontFamily:"Georgia,serif",fontSize:"1.9rem",fontWeight:700,color:"#22C55E",marginBottom:10}}>Dossier soumis !</h2>
+        <p style={{color:"#6A8DAA",lineHeight:1.7,marginBottom:22,fontSize:"0.88rem"}}>Ton engagement a été enregistré. Je te contacte dans les <strong style={{color:"#22C55E"}}>48 heures</strong> pour confirmer le rendez-vous en banque.</p>
+        <div style={{display:"inline-block",background:"rgba(34,197,94,0.1)",border:"1.5px solid rgba(34,197,94,0.25)",borderRadius:10,padding:"10px 26px",fontFamily:"Georgia,serif",fontSize:"1.1rem",fontWeight:700,color:"#22C55E",letterSpacing:"0.04em",marginBottom:24}}>{num}</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:24}}>
+          {[["Prochaine étape","📞 Appel sous 24h"],["Documents","🪪 CNI · 📱 Mobile Money"],["Rendez-vous","🏦 Jamais seul en banque"]].map(([t,v])=>(
+            <div key={t} style={{background:"rgba(4,16,30,0.6)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:12}}>
+              <div style={{fontSize:"0.6rem",fontWeight:800,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:5}}>{t}</div>
+              <div style={{fontSize:"0.76rem",lineHeight:1.5}}>{v}</div>
+            </div>
+          ))}
+        </div>
+        <button style={st.btnGold} onClick={()=>setPage("home")}>Retour à l'accueil</button>
+      </div>
+    </div>
+  );
+}
+
+function Suivi({suiviCode, setSuiviCode, suiviRes, setSuiviRes, setPage}) {
+  const statuts = {
+    recu:{label:"Dossier reçu ✅",color:"#22C55E",desc:"Ton dossier a été reçu et est en cours d'examen."},
+    en_cours:{label:"En cours d'analyse ⏳",color:"#EAB308",desc:"Analyse en cours. Un rendez-vous banque sera fixé très prochainement."},
+    rdv:{label:"Rendez-vous fixé 📅",color:"#1E90FF",desc:"Ton rendez-vous en banque est confirmé. Prépare tes documents."},
+    accepte:{label:"Crédit accordé 🎉",color:"#22C55E",desc:"Félicitations ! Ton crédit a été accordé."},
+    refuse:{label:"Dossier refusé ❌",color:"#EF4444",desc:"Ton dossier n'a pas été retenu. Contacte-nous pour explorer d'autres options."},
+  };
+  const check = () => {
+    if(suiviCode.trim().toUpperCase()==="CP-2026-TEST") setSuiviRes({nom:"Koné Aminata",statut:"en_cours",banque:"Ecobank CI",date:"15 Mars 2025",montant:"800 000 FCFA"});
+    else alert("Dossier introuvable. Vérifiez votre numéro de dossier.");
+  };
+  const s = suiviRes?statuts[suiviRes.statut]:null;
+  return (
+    <div style={{...st.body,minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:22}}>
+      <div style={{maxWidth:500,width:"100%"}}>
+        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:"#6A8DAA",cursor:"pointer",marginBottom:22,fontSize:"0.8rem"}}>← Retour</button>
+        <h2 style={{...st.sTitle,marginBottom:6}}>Suivi de <span style={{color:GOLD}}>dossier</span></h2>
+        <p style={{color:"#6A8DAA",marginBottom:24,fontSize:"0.86rem"}}>Entre ton numéro de dossier reçu après signature.</p>
+        <div style={{...st.card,border:"1px solid rgba(201,168,76,0.2)",marginBottom:14}}>
+          <label style={st.lbl}>Numéro de dossier</label>
+          <div style={{display:"flex",gap:10}}>
+            <input value={suiviCode} onChange={e=>setSuiviCode(e.target.value)} style={{...st.inp,flex:1}} placeholder="CP-2026-XXXX"/>
+            <button style={st.btnGold} onClick={check}>Chercher</button>
+          </div>
+          <p style={{fontSize:"0.65rem",color:"#4A6A85",marginTop:7}}>💡 Test : entre CP-2026-TEST</p>
+        </div>
+        {suiviRes&&s&&(
+          <div style={{...st.card,border:`1px solid ${s.color}33`,background:`${s.color}08`}}>
+            <div style={{fontWeight:800,color:s.color,fontSize:"0.95rem",marginBottom:6}}>{s.label}</div>
+            <div style={{fontSize:"0.78rem",color:"#6A8DAA",marginBottom:16}}>{s.desc}</div>
+            {[["Client",suiviRes.nom],["Banque",suiviRes.banque],["Montant",suiviRes.montant],["Soumis le",suiviRes.date]].map(([l,v])=>(
+              <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.05)",fontSize:"0.8rem"}}>
+                <span style={{color:"#6A8DAA",fontWeight:600}}>{l}</span><span style={{fontWeight:700}}>{v}</span>
+              </div>
+            ))}
+            <button style={{...st.btnGold,width:"100%",marginTop:14,padding:11,fontSize:"0.78rem"}} onClick={()=>window.open("https://wa.me/2250700000000")}>📱 Contacter mon courtier sur WhatsApp</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Dashboard({dashTab, setDashTab, setPage}) {
+  const data = {total:47,enCours:12,acceptes:28,refuses:7,revenuMois:560000,revenuTotal:2340000,tauxSucces:80,
+    dossiers:[{nom:"Koné A.",montant:"800K",statut:"accepté",date:"15 Mar",profil:"Commerçant"},{nom:"Kouassi J.",montant:"1.5M",statut:"accepté",date:"12 Mar",profil:"Salarié"},{nom:"Diabaté M.",montant:"500K",statut:"en cours",date:"10 Mar",profil:"Informel"},{nom:"Bamba O.",montant:"300K",statut:"refusé",date:"08 Mar",profil:"Informel"},{nom:"Traoré F.",montant:"1.2M",statut:"en cours",date:"05 Mar",profil:"PME"}]};
+  return (
+    <div style={{...st.body,minHeight:"100vh",padding:"80px 22px 40px"}}>
+      <div style={{maxWidth:960,margin:"0 auto"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap",gap:12}}>
+          <div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:"1.7rem",fontWeight:700}}>Tableau de <span style={{color:GOLD}}>bord</span></div>
+            <div style={{fontSize:"0.7rem",color:"#6A8DAA",marginTop:2}}>CréditPro CI · Mars 2025</div>
+          </div>
+          <button onClick={()=>setPage("home")} style={st.btnOutline}>← Retour au site</button>
+        </div>
+        <div style={{display:"flex",gap:8,marginBottom:22}}>
+          {[["apercu","Vue d'ensemble"],["dossiers","Dossiers"],["revenus","Revenus"]].map(([id,label])=>(
+            <button key={id} onClick={()=>setDashTab(id)} style={dashTab===id?st.pillOn:st.pill}>{label}</button>
+          ))}
+        </div>
+
+        {dashTab==="apercu"&&(
+          <>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:16}}>
+              {[[data.total,"Total","📋",GOLD],[data.enCours,"En cours","⏳","#EAB308"],[data.acceptes,"Acceptés","✅","#22C55E"],[data.refuses,"Refusés","❌","#EF4444"]].map(([v,l,i,c])=>(
+                <div key={l} style={{...st.card,textAlign:"center",padding:18}}>
+                  <div style={{fontSize:"1.3rem",marginBottom:6}}>{i}</div>
+                  <div style={{fontFamily:"Georgia,serif",fontSize:"1.8rem",fontWeight:700,color:c,marginBottom:3}}>{v}</div>
+                  <div style={{fontSize:"0.62rem",fontWeight:700,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.06em"}}>{l}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+              <div style={st.card}>
+                <div style={{fontSize:"0.65rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:12}}>Taux de succès</div>
+                <div style={{fontFamily:"Georgia,serif",fontSize:"2.8rem",fontWeight:700,color:"#22C55E",marginBottom:6}}>{data.tauxSucces}%</div>
+                <div style={{height:7,background:"rgba(255,255,255,0.05)",borderRadius:4,overflow:"hidden",marginBottom:6}}>
+                  <div style={{height:"100%",width:`${data.tauxSucces}%`,background:"#22C55E",borderRadius:4}}></div>
+                </div>
+                <div style={{fontSize:"0.72rem",color:"#6A8DAA"}}>Objectif 75% · <span style={{color:"#22C55E"}}>Dépassé ✅</span></div>
+              </div>
+              <div style={st.card}>
+                <div style={{fontSize:"0.65rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:12}}>Revenu ce mois</div>
+                <div style={{fontFamily:"Georgia,serif",fontSize:"1.8rem",fontWeight:700,color:GOLD,marginBottom:4}}>{fmt(data.revenuMois)}</div>
+                <div style={{fontSize:"0.72rem",color:"#6A8DAA",marginBottom:10}}>Total cumulé : <strong style={{color:"#fff"}}>{fmt(data.revenuTotal)}</strong></div>
+                <div style={{fontSize:"0.7rem",padding:"8px 10px",background:"rgba(201,168,76,0.06)",borderRadius:8,color:"#6A8DAA"}}>Moy. / dossier : <strong style={{color:GOLD}}>~20 000 FCFA</strong></div>
               </div>
             </div>
+          </>
+        )}
+
+        {dashTab==="dossiers"&&(
+          <div style={st.card}>
+            <div style={{fontSize:"0.65rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:14}}>Derniers dossiers</div>
+            {data.dossiers.map((d,i)=>{
+              const sc={accepté:"#22C55E","en cours":"#EAB308",refusé:"#EF4444"}[d.statut];
+              return (
+                <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 0",borderBottom:i<4?"1px solid rgba(255,255,255,0.05)":"none",flexWrap:"wrap"}}>
+                  <div style={{width:34,height:34,borderRadius:"50%",background:"rgba(201,168,76,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:"0.78rem",color:GOLD,flexShrink:0}}>{d.nom.charAt(0)}</div>
+                  <div style={{flex:1,minWidth:90}}>
+                    <div style={{fontWeight:700,fontSize:"0.83rem"}}>{d.nom}</div>
+                    <div style={{fontSize:"0.67rem",color:"#6A8DAA",marginTop:1}}>{d.profil} · {d.date}</div>
+                  </div>
+                  <div style={{fontWeight:800,color:GOLD,fontSize:"0.85rem"}}>{d.montant} FCFA</div>
+                  <span style={{fontSize:"0.62rem",padding:"2px 9px",borderRadius:20,background:`${sc}18`,color:sc,fontWeight:800,textTransform:"uppercase"}}>{d.statut}</span>
+                </div>
+              );
+            })}
           </div>
-          <button class="btn-primary" onclick="analyserCommercant()">🔍 Simuler mes 3 scénarios</button>
-        </div>
-      </div>
-    </div>
-  </div>
+        )}
 
-  <!-- ══ RÉSULTATS ══ -->
-  <div id="results">
-    <div class="sep"><div class="sep-line"></div><div class="sep-label">📊 Résultats de ton analyse</div><div class="sep-line"></div></div>
-
-    <div id="sc-tabs-wrap" style="display:none">
-      <div class="sc-tabs">
-        <div class="sctab p on" onclick="showSc('pessimiste')"><div class="sctab-dot"></div>😟 Mauvais mois</div>
-        <div class="sctab r" onclick="showSc('realiste')"><div class="sctab-dot"></div>😐 Mois normal</div>
-        <div class="sctab o" onclick="showSc('optimiste')"><div class="sctab-dot"></div>😁 Bon mois</div>
-      </div>
-    </div>
-
-    <div id="verdict" class="verdict-bar green">
-      <div class="verd-emo" id="vemo">✅</div>
-      <div class="verd-txt"><h2 id="vtitre">—</h2><p id="vdesc">—</p></div>
-      <div class="verd-right"><div class="vr-val" id="vrate">—</div><div class="vr-lbl">Endettement</div></div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="sbox"><div class="sv gold" id="st-mens">—</div><div class="sl">Mensualité / mois</div></div>
-      <div class="sbox"><div class="sv" id="st-reste">—</div><div class="sl">Reste après crédit</div></div>
-      <div class="sbox"><div class="sv w" id="st-total">—</div><div class="sl">Total remboursé</div></div>
-      <div class="sbox"><div class="sv gold" id="st-int">—</div><div class="sl">Intérêts au total</div></div>
-      <div class="sbox"><div class="sv" id="st-taux">—</div><div class="sl">Taux endettement</div></div>
-      <div class="sbox"><div class="sv" id="st-niv">—</div><div class="sl">Niveau de risque</div></div>
-    </div>
-
-    <div class="grid2">
-      <div class="card">
-        <div class="card-title"><div class="ct-ico gold">📊</div>Répartition de ton budget</div>
-        <div style="font-size:0.75rem;color:var(--muted);font-weight:600;margin-bottom:6px;">Pour 100 FCFA de revenu :</div>
-        <div class="bbar">
-          <div class="bb-seg c" id="bbar-c">—</div>
-          <div class="bb-seg d" id="bbar-d">—</div>
-          <div class="bb-seg l" id="bbar-l">—</div>
-        </div>
-        <div class="bleg" style="margin-bottom:18px;">
-          <div class="bl-item"><div class="bl-dot" style="background:var(--gold)"></div>Crédit</div>
-          <div class="bl-item"><div class="bl-dot" style="background:rgba(60,80,110,0.9)"></div>Dépenses</div>
-          <div class="bl-item"><div class="bl-dot" style="background:rgba(34,197,94,0.5)"></div>Reste</div>
-        </div>
-        <div class="gauge-wrap">
-          <div class="gauge-hd"><span style="font-size:0.75rem;font-weight:700;">Taux d'endettement</span><span id="g-val" style="font-weight:900;">0%</span></div>
-          <div class="gauge-track">
-            <div class="gauge-zones"><div class="gz-green"></div><div class="gz-yellow"></div><div class="gz-red"></div></div>
-            <div class="gauge-fill" id="g-fill" style="width:0"></div>
+        {dashTab==="revenus"&&(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            {[["Commission banques (0,5%/dossier)","140 000 FCFA","35 dossiers × 4 000 FCFA"],["Frais courtage clients (2%/dossier)","420 000 FCFA","35 dossiers × 12 000 FCFA"],["Forfaits dossiers PME","75 000 FCFA","3 dossiers × 25 000 FCFA"],["Total du mois","635 000 FCFA","Mars 2025 — Données illustratives"]].map(([l,v,d],i)=>(
+              <div key={i} style={{...st.card,borderColor:i===3?"rgba(201,168,76,0.3)":undefined}}>
+                <div style={{fontSize:"0.68rem",fontWeight:700,color:"#6A8DAA",marginBottom:8}}>{l}</div>
+                <div style={{fontFamily:"Georgia,serif",fontSize:"1.6rem",fontWeight:700,color:i===3?GOLD:"#fff",marginBottom:4}}>{v}</div>
+                <div style={{fontSize:"0.7rem",color:"#4A6A85"}}>{d}</div>
+              </div>
+            ))}
           </div>
-          <div class="gauge-ticks"><span>✅ &lt;30%</span><span>⚠️ 30–40%</span><span>🚫 &gt;40%</span></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title"><div class="ct-ico gold">💬</div>Expliqué simplement</div>
-        <div class="explain-box"><h4>🧮 Ce que ça signifie concrètement</h4><p id="explain-txt">—</p></div>
-        <ul class="clist" id="clist"></ul>
-      </div>
-      <div class="card" id="irr-card" style="display:none">
-        <div class="card-title"><div class="ct-ico" style="background:rgba(234,179,8,0.1)">⚠️</div>Conseil commerçant</div>
-        <div class="irr-alert-box" id="irr-txt">—</div>
-      </div>
-      <div class="card full">
-        <div class="card-title"><div class="ct-ico blue">🏦</div>Comparatif banques partenaires</div>
-        <div id="bank-list"></div>
+        )}
       </div>
     </div>
-
-    <!-- BOUTON VERS ENGAGEMENT -->
-    <div style="margin-top:24px;text-align:center;">
-      <button class="btn-primary" style="max-width:500px;margin:0 auto;display:block;" onclick="ouvrirEngagement()">
-        🤝 Continuer — Prendre mon engagement &amp; être accompagné
-      </button>
-      <p style="margin-top:10px;font-size:0.75rem;color:var(--muted);">Étape 2 sur 2 — Dossier officiel + accompagnement personnalisé en banque</p>
-    </div>
-  </div>
-
-  <!-- ══ ÉTAPE 2 : ENGAGEMENT ══ -->
-  <div id="engagement-section">
-    <div class="sep"><div class="sep-line"></div><div class="sep-label">🤝 Étape 2 — Engagement & Accompagnement</div><div class="sep-line"></div></div>
-
-    <div class="engagement-hero">
-      <div class="eg-icon">🏛️</div>
-      <h2>Mon engagement envers <span>CréditPro CI</span></h2>
-      <p>En signant cet engagement, tu acceptes les conditions de notre service d'accompagnement. Je m'engage de mon côté à te défendre auprès des banques partenaires et à obtenir la meilleure offre possible pour ton dossier.</p>
-      <ul class="engagement-clauses">
-        <li class="ec"><div class="ec-num">1</div><div class="ec-txt">Je fournirai des <strong>informations exactes et complètes</strong> sur mes revenus, mes dépenses et ma situation personnelle. Toute fausse déclaration annule l'accompagnement.</div></li>
-        <li class="ec"><div class="ec-num">2</div><div class="ec-txt">Je m'engage à <strong>préparer les documents demandés</strong> (pièce d'identité, justificatifs de revenus, relevés Mobile Money) dans les délais convenus avec mon courtier.</div></li>
-        <li class="ec"><div class="ec-num">3</div><div class="ec-txt">Je comprends que le crédit accordé doit être <strong>remboursé selon l'échéancier convenu</strong> avec la banque. En cas de difficulté, je contacte immédiatement mon courtier avant tout retard.</div></li>
-        <li class="ec"><div class="ec-num">4</div><div class="ec-txt">Je m'engage à <strong>honorer les rendez-vous bancaires</strong> fixés par mon courtier et à me présenter avec les documents complets. Toute absence sans préavis entraîne des frais de dossier.</div></li>
-        <li class="ec"><div class="ec-num">5</div><div class="ec-txt">Les <strong>frais de courtage</strong> (fixés et communiqués avant toute démarche) seront réglés uniquement en cas d'obtention effective du crédit. Aucun frais si échec.</div></li>
-      </ul>
-    </div>
-
-    <!-- INFOS CLIENT -->
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-title"><div class="ct-ico gold">👤</div>Tes informations personnelles</div>
-      <div class="grid2">
-        <div class="field">
-          <label class="lbl">Prénom & Nom complet</label>
-          <input type="text" id="eg-nom" class="no-pfx" placeholder="Ex : Kouassi Jean-Michel">
-        </div>
-        <div class="field">
-          <label class="lbl">Numéro de téléphone (WhatsApp)</label>
-          <input type="tel" id="eg-tel" class="no-pfx" placeholder="+225 07 XX XX XX XX">
-        </div>
-        <div class="field">
-          <label class="lbl">Commune / Quartier</label>
-          <input type="text" id="eg-quartier" class="no-pfx" placeholder="Ex : Yopougon, Cocody, Abobo...">
-        </div>
-        <div class="field">
-          <label class="lbl">Profession</label>
-          <input type="text" id="eg-profession" class="no-pfx" placeholder="Ex : Agent commercial, Commerçante, Chauffeur...">
-        </div>
-        <div class="field full">
-          <label class="lbl">Pour quel projet veux-tu ce crédit ? <span class="hint">En quelques mots</span></label>
-          <textarea id="eg-projet" class="no-pfx" placeholder="Ex : Acheter du stock pour mon commerce, rembourser une dette urgente, financer un équipement..."></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- CHECKBOX ENGAGEMENT -->
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-title"><div class="ct-ico gold">✅</div>Acceptation des termes</div>
-      <div class="checkbox-row" onclick="toggleCheck('cb1')">
-        <input type="checkbox" id="cb1">
-        <label class="cb-label" for="cb1">Je confirme que <strong>toutes les informations financières saisies sont exactes</strong> et correspondent à ma situation réelle.</label>
-      </div>
-      <div class="checkbox-row" style="margin-top:10px;" onclick="toggleCheck('cb2')">
-        <input type="checkbox" id="cb2">
-        <label class="cb-label" for="cb2">J'accepte les <strong>5 clauses d'engagement</strong> listées ci-dessus et je m'engage à les respecter intégralement.</label>
-      </div>
-      <div class="checkbox-row" style="margin-top:10px;" onclick="toggleCheck('cb3')">
-        <input type="checkbox" id="cb3">
-        <label class="cb-label" for="cb3">J'autorise <strong>CréditPro CI</strong> à transmettre mon dossier aux banques partenaires dans le cadre de ma demande de crédit.</label>
-      </div>
-    </div>
-
-    <!-- SIGNATURE -->
-    <div class="card" style="margin-bottom:20px;">
-      <div class="card-title"><div class="ct-ico gold">✍️</div>Signature électronique</div>
-      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;line-height:1.6;">Signe dans le cadre ci-dessous avec ton doigt (mobile) ou ta souris (ordinateur). Ta signature constitue ton accord officiel.</p>
-      <div class="sig-canvas-wrap">
-        <canvas id="sig-canvas"></canvas>
-        <div class="sig-tools">
-          <span class="sig-hint">✍️ Dessine ta signature ici</span>
-          <button class="sig-clear" onclick="clearSig()">Effacer</button>
-        </div>
-      </div>
-    </div>
-
-    <button class="btn-primary" onclick="validerEngagement()">📋 Valider mon engagement &amp; Soumettre mon dossier</button>
-  </div>
-
-  <!-- ══ CONFIRMATION ══ -->
-  <div id="confirmation">
-    <div class="confirm-card">
-      <span class="confirm-ico">🎉</span>
-      <h2>Dossier soumis avec succès !</h2>
-      <p>Ton engagement a été enregistré. Je vais analyser ton dossier et te contacter dans les <strong style="color:var(--green)">48 heures</strong> pour confirmer le rendez-vous en banque.</p>
-      <div class="dossier-num" id="dossier-num">N° DOSSIER : CP-2026-XXXX</div>
-      <p style="font-size:0.8rem;color:var(--muted);margin-top:4px;">Garde ce numéro précieusement. Il te permettra de suivre ton dossier.</p>
-      <div class="confirm-steps">
-        <div class="cs"><div class="cs-n">Prochaine étape</div><div class="cs-v">📞 Appel de confirmation sous 24h</div></div>
-        <div class="cs"><div class="cs-n">Documents à préparer</div><div class="cs-v">🪪 CNI • 📋 Justificatifs revenus • 📱 Relevés Mobile Money</div></div>
-        <div class="cs"><div class="cs-n">Rendez-vous banque</div><div class="cs-v">🏦 Fixé ensemble. Tu ne vas jamais seul.</div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer-note">
-    ⚠️ Simulation à but éducatif. Taux indicatifs basés sur le marché ivoirien.<br>
-    CréditPro CI n'est pas une banque. Nous sommes un service de courtage et d'accompagnement indépendant.
-  </div>
-</div>
-
-<script>
-// ── STATE ──
-let mode = 'salarie';
-let dureeS = null, dureeC = null;
-let scenarios = null;
-let currentSc = 'pessimiste';
-let isComm = false;
-let manualMois = false;
-let sigDrawing = false;
-let sigHasContent = false;
-let lastPos = {x:0, y:0};
-let resultData = {};
-
-// ── MODE ──
-function setMode(m) {
-  mode = m;
-  document.getElementById('form-salarie').style.display = m === 'salarie' ? 'block' : 'none';
-  document.getElementById('form-commercant').style.display = m === 'commercant' ? 'block' : 'none';
-  document.getElementById('mode-sal').classList.toggle('active', m === 'salarie');
-  document.getElementById('mode-com').classList.toggle('active', m === 'commercant');
-  hide('results'); hide('engagement-section'); hide('confirmation');
+  );
 }
-
-function selDuree(f, v, el) {
-  if(f==='s') dureeS=v; else dureeC=v;
-  el.closest('.dur-row').querySelectorAll('.dpill').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');
-}
-
-function toggleMois(manual, el) {
-  manualMois = manual;
-  el.closest('.ptabs').querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');
-  const mv = document.getElementById('mois-manual');
-  const ad = document.getElementById('rev-auto');
-  mv.classList.toggle('show', manual);
-  ad.style.display = manual ? 'none' : 'block';
-  if(!manual) calcRev();
-}
-
-function calcRev() {
-  const j = parseFloat(document.getElementById('c-jour').value)||0;
-  const s = parseFloat(document.getElementById('c-semaine').value)||0;
-  const a = parseFloat(document.getElementById('c-autre-rev').value)||0;
-  const t = j*22 + s*4.3 + a;
-  document.getElementById('rev-calc').textContent = t>0 ? fmt(t) : '—';
-  return t;
-}
-
-function toggleCheck(id) {
-  const cb = document.getElementById(id);
-  cb.checked = !cb.checked;
-}
-
-// ── UTILS ──
-function fmt(n){ return Math.round(n).toLocaleString('fr-FR')+' FCFA'; }
-function pct(n){ return Math.round(n)+'%'; }
-function show(id){ const el=document.getElementById(id); el.style.display='block'; void el.offsetWidth; el.classList.add('show'); }
-function hide(id){ document.getElementById(id).style.display='none'; document.getElementById(id).classList.remove('show'); }
-
-function getMens(montant, duree, tauxAn) {
-  const tm = tauxAn/12;
-  if(tm===0) return montant/duree;
-  return montant*(tm*Math.pow(1+tm,duree))/(Math.pow(1+tm,duree)-1);
-}
-function getDep(ids){ return ids.reduce((s,id)=>s+(parseFloat(document.getElementById(id)?.value)||0),0); }
-
-// ── ANALYSER SALARIÉ ──
-function analyserSalarie() {
-  const rev = (parseFloat(document.getElementById('s-salaire').value)||0)
-             +(parseFloat(document.getElementById('s-autres').value)||0);
-  const dep = getDep(['s-loyer','s-nourr','s-trans','s-tel','s-fam','s-autre-dep']);
-  const montant = parseFloat(document.getElementById('s-montant').value)||0;
-  const duree = dureeS;
-  if(!rev||!montant||!duree) return alert('⚠️ Remplis le salaire, le montant et sélectionne une durée.');
-  isComm = false;
-  resultData = {rev, dep, montant, duree};
-  document.getElementById('sc-tabs-wrap').style.display='none';
-  afficherResultats({rev,dep,montant,duree});
-}
-
-// ── ANALYSER COMMERÇANT ──
-function analyserCommercant() {
-  const montant = parseFloat(document.getElementById('c-montant').value)||0;
-  const duree = dureeC;
-  if(!montant||!duree) return alert('⚠️ Entre le montant et sélectionne une durée.');
-  const dep = getDep(['c-loyer','c-stock','c-nourr','c-trans','c-tel','c-fam','c-autre-dep']);
-  let pire,moyen,bon;
-  if(manualMois){
-    moyen=parseFloat(document.getElementById('c-moyen').value)||0;
-    pire=parseFloat(document.getElementById('c-pire').value)||moyen*0.6;
-    bon=parseFloat(document.getElementById('c-bon').value)||moyen*1.5;
-    if(!moyen) return alert('⚠️ Entre au moins ton revenu en mois normal.');
-  } else {
-    moyen=calcRev();
-    if(!moyen) return alert('⚠️ Entre un revenu journalier ou hebdomadaire.');
-    pire=moyen*0.55; bon=moyen*1.55;
-  }
-  isComm=true;
-  scenarios={pessimiste:{rev:pire,dep,montant,duree},realiste:{rev:moyen,dep,montant,duree},optimiste:{rev:bon,dep,montant,duree}};
-  currentSc='pessimiste';
-  updateScTabs();
-  document.getElementById('sc-tabs-wrap').style.display='block';
-  resultData=scenarios.pessimiste;
-  afficherResultats(scenarios.pessimiste);
-}
-
-function showSc(s){
-  currentSc=s;
-  updateScTabs();
-  resultData=scenarios[s];
-  afficherResultats(scenarios[s]);
-}
-
-function updateScTabs(){
-  const map={pessimiste:'p',realiste:'r',optimiste:'o'};
-  document.querySelectorAll('.sctab').forEach(t=>{
-    const cls=t.className.split(' ').find(c=>['p','r','o'].includes(c));
-    t.classList.toggle('on',map[currentSc]===cls);
-  });
-}
-
-// ── AFFICHER RÉSULTATS ──
-function afficherResultats({rev,dep,montant,duree}){
-  const tRef=0.12;
-  const mens=getMens(montant,duree,tRef);
-  const total=mens*duree;
-  const int=total-montant;
-  const reste=rev-dep-mens;
-  const tx=(mens/rev)*100;
-
-  let cls,emo,titre,desc;
-  if(tx<30&&reste>0){cls='green';emo='✅';titre='Dossier Finançable';desc='Ton profil est sain. Je peux défendre ton dossier auprès de nos banques partenaires avec confiance.';}
-  else if(tx<40&&reste>0){cls='yellow';emo='⚠️';titre='Dossier à Optimiser';desc='C\'est possible mais limite. On va travailler ensemble sur quelques ajustements avant de solliciter les banques.';}
-  else{cls='red';emo='🚫';titre=reste<=0?'Dossier Non Finançable':'Dossier Très Risqué';desc=reste<=0?'Le revenu ne couvre pas les dépenses actuelles. On doit revoir le montant ou la durée.':'Ce niveau d\'endettement dépassera les critères des banques. Réduisons le montant demandé.';}
-
-  const v=document.getElementById('verdict');
-  v.className='verdict-bar '+cls;
-  document.getElementById('vemo').textContent=emo;
-  document.getElementById('vtitre').textContent=titre;
-  document.getElementById('vdesc').textContent=desc;
-  document.getElementById('vrate').textContent=pct(tx);
-
-  const rc=reste>0?'g':'r';
-  setText('st-mens',fmt(mens),'gold');
-  setText('st-reste',fmt(reste),rc);
-  setText('st-total',fmt(total),'w');
-  setText('st-int',fmt(int),'gold');
-  const tc=tx<30?'g':tx<40?'y':'r';
-  setText('st-taux',pct(tx),tc);
-  const niv=tx<30?'Faible ✅':tx<40?'Moyen ⚠️':'Élevé 🚫';
-  setText('st-niv',niv,tc);
-
-  // Gauge
-  document.getElementById('g-val').textContent=pct(tx);
-  setTimeout(()=>{
-    const f=document.getElementById('g-fill');
-    f.style.width=Math.min(tx,100)+'%';
-    f.style.background=tx<30?'var(--green)':tx<40?'var(--yellow)':'var(--red)';
-  },80);
-
-  // Budget bar
-  const pC=Math.min((mens/rev)*100,100);
-  const pD=Math.min((dep/rev)*100,100-pC);
-  const pL=Math.max(100-pC-pD,0);
-  setTimeout(()=>{setBar('bbar-c',pC);setBar('bbar-d',pD);setBar('bbar-l',pL);},80);
-
-  // Explication
-  const intMois=Math.round(int/duree);
-  document.getElementById('explain-txt').innerHTML=
-    `Tu veux <strong>${fmt(montant)}</strong> sur <strong>${duree} mois</strong>. Chaque mois tu paieras <strong>${fmt(mens)}</strong>.<br><br>
-    C'est <strong>${fmt(Math.round(montant/duree))}</strong> de capital + <strong>${fmt(intMois)}</strong> d'intérêts. Au total tu rembourseras <strong>${fmt(total)}</strong>.<br><br>
-    Il te restera <strong>${fmt(reste)}</strong> par mois pour vivre.`;
-
-  // Conseils
-  const cons=[];
-  if(tx>40) cons.push({t:'danger',i:'🚫',txt:`<strong>Taux d'endettement trop élevé (${pct(tx)}).</strong> Les banques exigent moins de 40%. Je te conseille de demander ${fmt(montant*0.7)} ou passer à 36 mois.`});
-  if(tx>30&&tx<=40) cons.push({t:'warn',i:'⚠️',txt:`<strong>Taux limite (${pct(tx)}).</strong> On peut passer, mais j'aurai besoin de documents solides pour convaincre la banque.`});
-  if(reste<20000&&reste>0) cons.push({t:'warn',i:'💸',txt:`<strong>Reste de vie très serré (${fmt(reste)}).</strong> En cas d'imprévu, tu peux avoir du mal à rembourser. Prévoyons une marge de sécurité.`});
-  if(reste<=0) cons.push({t:'danger',i:'❌',txt:`<strong>Déficit mensuel.</strong> Il faut réduire le montant ou allonger la durée. Parlons-en ensemble.`});
-  if(tx<30&&reste>30000) cons.push({t:'ok',i:'✅',txt:`<strong>Excellent profil !</strong> Ton dossier est solide. Je vais négocier le meilleur taux pour toi auprès de nos partenaires.`});
-  if(isComm) cons.push({t:'warn',i:'📋',txt:`<strong>Commerçant :</strong> Prépare tes reçus Mobile Money (3 derniers mois) et un carnet de ventes. Ça renforce ton dossier.`});
-  else cons.push({t:'ok',i:'📋',txt:`<strong>Documents à préparer :</strong> 3 bulletins de salaire, 3 relevés bancaires, CNI valide.`});
-
-  document.getElementById('clist').innerHTML=cons.map(c=>`<li class="ci"><div class="cico ${c.t}">${c.i}</div><div class="ctxt">${c.txt}</div></li>`).join('');
-
-  if(isComm&&scenarios){
-    document.getElementById('irr-card').style.display='block';
-    document.getElementById('irr-txt').innerHTML=buildIrr(scenarios,mens);
-  } else document.getElementById('irr-card').style.display='none';
-
-  // Banques — taux réels marché ivoirien 2025
-  const banques=[
-    {n:'SGBCI (Société Générale)',t:10.75,tag:'best',info:'Salarié CDI · Domiciliation salaire obligatoire'},
-    {n:'BICICI (BNP Paribas)',t:11.0,tag:'best',info:'Salarié · Fonctionnaire · Durée max 48 mois'},
-    {n:'SIB',t:11.5,tag:'mid',info:'Salarié · Fonctionnaire · Domiciliation requise'},
-    {n:'Ecobank CI',t:12.0,tag:'mid',info:'Salarié & Informel accepté · Mobile Money pris en compte'},
-    {n:'Banque Atlantique',t:12.5,tag:'mid',info:'Informel accepté · Commerçant possible'},
-    {n:'NSIA Banque',t:13.0,tag:'high',info:'Particuliers · Professions libérales'},
-    {n:'BNI',t:13.5,tag:'high',info:'Fonctionnaire prioritaire · Projet immobilier'},
-    {n:'UBA Côte d\'Ivoire',t:14.0,tag:'high',info:'Commerce & transferts · Réseau Afrique'},
-  ];
-  const labels={best:'Taux compétitif',mid:'Taux moyen',high:'Taux élevé'};
-  document.getElementById('bank-list').innerHTML=`
-    <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:0.78rem;color:var(--muted);line-height:1.6;">
-      ℹ️ <strong style="color:var(--gold)">Taux indicatifs 2025</strong> — Taux directeur BCEAO : 3,5% · Taux maximum légal (UMOA) : 24% · Les taux varient selon profil, durée et domiciliation.
-    </div>`+
-  banques.map(b=>{
-    const m=getMens(montant,duree,b.t/100);
-    return `<div class="bk-row">
-      <div>
-        <div class="bk-name">🏦 ${b.n}</div>
-        <div style="font-size:0.68rem;color:var(--muted);margin-top:2px;">${b.info}</div>
-      </div>
-      <div class="bk-rate">${b.t}%<span style="font-size:0.65rem;font-weight:600;color:var(--muted)">/an</span></div>
-      <div class="bk-detail">${fmt(m)} / mois<br>Total : ${fmt(m*duree)}</div>
-      <span class="btag ${b.tag}">${labels[b.tag]}</span>
-    </div>`;
-  }).join('');
-
-  // Documents requis selon profil
-  const docsSalarie=[
-    {ico:'🪪',txt:'CNI ou passeport en cours de validité'},
-    {ico:'📋',txt:'3 derniers bulletins de salaire'},
-    {ico:'🏢',txt:'Attestation de travail ou contrat CDI'},
-    {ico:'🏦',txt:'3 derniers relevés bancaires'},
-    {ico:'🏠',txt:'Justificatif de domicile — facture CIE/SODECI de moins de 3 mois'},
-    {ico:'📝',txt:'Formulaire de demande de crédit (fourni par la banque)'},
-    {ico:'📸',txt:'2 photos d\'identité récentes'},
-  ];
-  const docsCommercant=[
-    {ico:'🪪',txt:'CNI ou passeport en cours de validité'},
-    {ico:'📦',txt:'Registre de Commerce (RCCM) — P0, P2 ou P2 bis'},
-    {ico:'📱',txt:'Relevés Mobile Money des 3 derniers mois (MTN/Orange)'},
-    {ico:'📒',txt:'Carnet de ventes ou journal de caisse (3 mois minimum)'},
-    {ico:'🏠',txt:'Justificatif de domicile — facture CIE/SODECI de moins de 3 mois'},
-    {ico:'📸',txt:'2 photos d\'identité récentes'},
-    {ico:'📝',txt:'Formulaire de demande de crédit (fourni par la banque)'},
-    {ico:'💡',txt:'Attestation de local commercial si disponible'},
-  ];
-  const docs = isComm ? docsCommercant : docsSalarie;
-  const docsHtml = docs.map(d=>`
-    <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
-      <span style="font-size:1rem;width:22px;flex-shrink:0;">${d.ico}</span>
-      <span style="font-size:0.82rem;color:var(--text);line-height:1.5;">${d.txt}</span>
-    </div>`).join('');
-
-  // Injecter la section documents si elle n'existe pas encore
-  if(!document.getElementById('docs-section')){
-    const docsCard=document.createElement('div');
-    docsCard.id='docs-section';
-    docsCard.className='card full';
-    docsCard.innerHTML=`
-      <div class="card-title"><div class="ct-ico green">📂</div>Documents à préparer pour ton dossier</div>
-      <div style="background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.15);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:0.78rem;color:var(--muted);line-height:1.6;">
-        ✅ <strong style="color:var(--green)">Profil : ${isComm?'Commerçant / Indépendant':'Salarié'}</strong> — Voici la liste exacte des documents demandés par les banques ivoiriennes.
-      </div>
-      <div id="docs-list">${docsHtml}</div>`;
-    document.getElementById('bank-list').closest('.card').after(docsCard);
-  } else {
-    document.getElementById('docs-list').innerHTML=docsHtml;
-    document.querySelector('#docs-section .card-title').nextElementSibling.innerHTML=
-      `✅ <strong style="color:var(--green)">Profil : ${isComm?'Commerçant / Indépendant':'Salarié'}</strong> — Voici la liste exacte des documents demandés par les banques ivoiriennes.`;
-  }
-
-  const res=document.getElementById('results');
-  res.style.display='block';
-  void res.offsetWidth;
-  res.classList.add('show');
-  setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
-  setStep(2);
-}
-
-function buildIrr(sc,mens){
-  const donne=(s)=>{const d=scenarios[s];return d.rev-d.dep-mens>0;};
-  const [ok1,ok2,ok3]=[donne('pessimiste'),donne('realiste'),donne('optimiste')];
-  let t=`<strong>Analyse sur tes 3 scénarios :</strong><br><br>`;
-  t+=`😟 <strong>Mauvais mois</strong> (${fmt(sc.pessimiste.rev)}) → ${ok1?'✅ Remboursement possible':'❌ Insuffisant'}<br>`;
-  t+=`😐 <strong>Mois normal</strong> (${fmt(sc.realiste.rev)}) → ${ok2?'✅ Remboursement possible':'❌ Insuffisant'}<br>`;
-  t+=`😁 <strong>Bon mois</strong> (${fmt(sc.optimiste.rev)}) → ${ok3?'✅ Remboursement possible':'❌ Insuffisant'}<br><br>`;
-  if(!ok1&&ok2) t+=`⚠️ Les mauvais mois seront difficiles. <strong>Je te conseille de constituer une réserve de 1–2 mensualités</strong> avant de commencer.`;
-  else if(!ok2) t+=`🚫 <strong>Même en mois normal tu ne peux pas rembourser.</strong> Revoyons le montant ensemble.`;
-  else if(ok1) t+=`✅ <strong>Dossier très solide !</strong> Tu peux rembourser même en mauvais mois. Excellent signal pour les banques.`;
-  return t;
-}
-
-function ouvrirEngagement(){
-  const es=document.getElementById('engagement-section');
-  es.style.display='block';
-  void es.offsetWidth;
-  es.classList.add('show');
-  setTimeout(()=>es.scrollIntoView({behavior:'smooth',block:'start'}),100);
-  initSig();
-  setStep(2);
-}
-
-// ── SIGNATURE ──
-let canvas,ctx;
-function initSig(){
-  canvas=document.getElementById('sig-canvas');
-  const dpr=window.devicePixelRatio||1;
-  const rect=canvas.getBoundingClientRect();
-  canvas.width=rect.width*dpr||600;
-  canvas.height=140*dpr;
-  ctx=canvas.getContext('2d');
-  ctx.scale(dpr,dpr);
-  ctx.strokeStyle='#C9A84C';
-  ctx.lineWidth=2.5;
-  ctx.lineCap='round';
-  ctx.lineJoin='round';
-
-  canvas.addEventListener('mousedown',e=>{sigDrawing=true;const p=pos(e);lastPos=p;});
-  canvas.addEventListener('mousemove',e=>{if(!sigDrawing)return;draw(pos(e));});
-  canvas.addEventListener('mouseup',()=>sigDrawing=false);
-  canvas.addEventListener('mouseleave',()=>sigDrawing=false);
-  canvas.addEventListener('touchstart',e=>{e.preventDefault();sigDrawing=true;const p=pos(e.touches[0]);lastPos=p;},{passive:false});
-  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!sigDrawing)return;draw(pos(e.touches[0]));},{passive:false});
-  canvas.addEventListener('touchend',()=>sigDrawing=false);
-}
-
-function pos(e){
-  const r=canvas.getBoundingClientRect();
-  return{x:e.clientX-r.left,y:e.clientY-r.top};
-}
-function draw(p){
-  ctx.beginPath();ctx.moveTo(lastPos.x,lastPos.y);ctx.lineTo(p.x,p.y);ctx.stroke();
-  lastPos=p;sigHasContent=true;
-}
-function clearSig(){if(ctx){ctx.clearRect(0,0,canvas.width,canvas.height);}sigHasContent=false;}
-
-// ── VALIDATION ENGAGEMENT ──
-async function validerEngagement(){
-  const nom=document.getElementById('eg-nom').value.trim();
-  const tel=document.getElementById('eg-tel').value.trim();
-  const quartier=document.getElementById('eg-quartier').value.trim();
-  const profession=document.getElementById('eg-profession').value.trim();
-  const projet=document.getElementById('eg-projet').value.trim();
-  const cb1=document.getElementById('cb1').checked;
-  const cb2=document.getElementById('cb2').checked;
-  const cb3=document.getElementById('cb3').checked;
-
-  if(!nom||!tel||!quartier||!profession) return alert('⚠️ Remplis toutes tes informations personnelles.');
-  if(!projet) return alert('⚠️ Précise le projet pour lequel tu demandes ce crédit.');
-  if(!cb1||!cb2||!cb3) return alert('⚠️ Tu dois cocher les 3 cases d\'acceptation pour continuer.');
-  if(!sigHasContent) return alert('⚠️ Signe dans le cadre prévu avant de valider.');
-
-  const num='CP-2026-'+String(Math.floor(Math.random()*9000)+1000);
-  const d=resultData;
-  const mens=d.montant&&d.duree?Math.round(getMens(d.montant,d.duree,0.12)):0;
-
-  // Envoi Formspree
-  try {
-    await fetch('https://formspree.io/f/mykdaqay',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({
-        '📋 Numéro Dossier': num,
-        '👤 Nom complet': nom,
-        '📱 Téléphone WhatsApp': tel,
-        '📍 Quartier': quartier,
-        '💼 Profession': profession,
-        '🎯 Projet': projet,
-        '💰 Montant demandé': d.montant?fmt(d.montant):'—',
-        '📅 Durée': d.duree?d.duree+' mois':'—',
-        '💵 Mensualité estimée': mens?fmt(mens):'—',
-        '📊 Revenu mensuel': d.rev?fmt(d.rev):'—',
-        '🧾 Dépenses mensuelles': d.dep?fmt(d.dep):'—',
-        '📈 Type de profil': isComm?'Commerçant / Indépendant':'Salarié',
-      })
-    });
-  } catch(e){ console.log('Formspree error',e); }
-
-  document.getElementById('dossier-num').textContent='N° DOSSIER : '+num;
-  const conf=document.getElementById('confirmation');
-  conf.style.display='block';
-  void conf.offsetWidth;
-  conf.classList.add('show');
-  setTimeout(()=>conf.scrollIntoView({behavior:'smooth',block:'start'}),100);
-  setStep(3);
-}
-
-// ── STEPS ──
-function setStep(n){
-  [1,2,3].forEach(i=>{
-    const el=document.getElementById('hs'+i);
-    if(i<n){el.className='hstep done';el.textContent='✓';}
-    else if(i===n){el.className='hstep active';el.textContent=i;}
-    else{el.className='hstep';el.textContent=i;}
-  });
-}
-
-// ── DOM HELPERS ──
-function setText(id,val,cls){const el=document.getElementById(id);el.textContent=val;el.className='sv '+(cls||'w');}
-function setBar(id,p){const el=document.getElementById(id);el.style.width=Math.max(p,0)+'%';el.textContent=Math.round(p)>6?Math.round(p)+'%':'';}
-</script>
-</body>
-</html>
