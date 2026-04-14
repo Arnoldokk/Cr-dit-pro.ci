@@ -1,684 +1,450 @@
-import { useState, useEffect, useRef } from "react";
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="CréditPro CI — Service de courtage bancaire en Côte d'Ivoire. Simulez votre crédit, préparez votre dossier et obtenez votre financement." />
+  <title>CréditPro CI — Courtage Bancaire en Côte d'Ivoire</title>
 
-const GOLD="#C9A84C", GOLD2="#E8C97A", NAVY="#04101E";
-const fmt = n => Math.round(n).toLocaleString("fr-FR")+" FCFA";
-const pct = n => Math.round(n)+"%";
-const getMens = (m,d,t) => { const tm=t/12; if(!tm) return m/d; return m*(tm*Math.pow(1+tm,d))/(Math.pow(1+tm,d)-1); };
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-const BANKS = [
-  {n:"SGBCI (Société Générale)",t:10.75,tag:"best",q:"Domiciliation salaire obligatoire",profiles:["salarie","fonctionnaire"]},
-  {n:"BICICI (BNP Paribas)",t:11.0,tag:"best",q:"Durée max 48 mois",profiles:["salarie","fonctionnaire"]},
-  {n:"SIB",t:11.5,tag:"mid",q:"Domiciliation requise",profiles:["salarie","fonctionnaire"]},
-  {n:"Ecobank CI",t:12.0,tag:"mid",q:"Mobile Money accepté ✅",profiles:["salarie","informel","pme"]},
-  {n:"Banque Atlantique",t:12.5,tag:"mid",q:"Informel accepté ✅",profiles:["informel","pme","salarie"]},
-  {n:"NSIA Banque",t:13.0,tag:"high",q:"Professions libérales",profiles:["salarie","pme"]},
-  {n:"BNI",t:13.5,tag:"high",q:"Fonctionnaire prioritaire",profiles:["fonctionnaire"]},
-  {n:"UBA CI",t:14.0,tag:"high",q:"Commerce & transferts",profiles:["pme","informel"]},
-];
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
 
-const DOCS = {
-  salarie:["🪪 CNI ou passeport valide","📋 3 derniers bulletins de salaire","🏢 Attestation de travail / Contrat CDI","🏦 3 derniers relevés bancaires","🏠 Justificatif domicile (CIE/SODECI < 3 mois)","📸 2 photos d'identité récentes","📝 Formulaire demande crédit (banque)"],
-  fonctionnaire:["🪪 CNI ou passeport valide","📋 3 derniers bulletins de salaire","🏛️ Arrêté de nomination ou attestation de service","🏦 3 derniers relevés bancaires","🏠 Justificatif domicile (CIE/SODECI < 3 mois)","📸 2 photos d'identité récentes","📝 Formulaire demande crédit (banque)"],
-  informel:["🪪 CNI ou passeport valide","📱 Relevés Mobile Money 3 derniers mois (MTN/Orange/Wave)","📒 Carnet de ventes ou journal de caisse (3 mois)","📦 Registre de Commerce RCCM si disponible","🏠 Justificatif domicile (CIE/SODECI < 3 mois)","📸 2 photos d'identité récentes","💡 Attestation local commercial si disponible"],
-  pme:["🪪 CNI ou passeport valide","📦 Registre de Commerce (RCCM) en cours de validité","📊 2 derniers bilans comptables ou relevés CA","🏦 6 derniers relevés bancaires entreprise","📝 Business plan ou note de présentation du projet","🏠 Justificatif domicile dirigeant","📸 2 photos d'identité récentes"],
-};
+  <!-- ============================================================
+       PAGE : HOME
+       ============================================================ -->
+  <div class="page active" id="page-home">
 
-const TEMOIGNAGES = [
-  {nom:"Koné Aminata",quartier:"Yopougon",montant:"800 000 FCFA",duree:"24 mois",profil:"Commerçante",texte:"Je n'y croyais plus. CréditPro CI a préparé mon dossier avec mes relevés Wave et m'a accompagnée à Ecobank. J'ai eu mon crédit en 8 jours.",note:5},
-  {nom:"Kouassi Jean-Paul",quartier:"Cocody",montant:"1 500 000 FCFA",duree:"36 mois",profil:"Salarié privé",texte:"Le simulateur m'a montré exactement ce que je pouvais emprunter. Le courtier a négocié un taux que je n'aurais jamais obtenu seul.",note:5},
-  {nom:"Diabaté Mariam",quartier:"Abobo",montant:"500 000 FCFA",duree:"12 mois",profil:"Vendeuse ambulante",texte:"J'avais peur d'aller à la banque seule. Avec CréditPro CI j'étais accompagnée. Ils ont su expliquer mon activité mieux que moi.",note:5},
-];
-
-const ACTU = [
-  {date:"Mars 2025",titre:"Ecobank CI accepte les relevés Mobile Money",resume:"La banque annonce officiellement accepter les historiques MTN MoMo, Orange Money et Wave comme preuve de revenus pour les crédits < 1 million FCFA.",tag:"Crédit"},
-  {date:"Fév 2025",titre:"Taux directeur BCEAO maintenu à 3,5%",resume:"La Banque Centrale stabilise les conditions de crédit dans toute la zone UEMOA pour le premier semestre 2025.",tag:"BCEAO"},
-  {date:"Jan 2025",titre:"Wave Bank Africa : 21 millions de comptes",resume:"La fintech confirme son passage au statut bancaire avec un capital de 20 milliards FCFA — nouvelles perspectives pour l'inclusion financière.",tag:"Fintech"},
-];
-
-const AGENCES = [
-  {nom:"Ecobank CI — Plateau",quartier:"Plateau",couleur:"#22C55E",profils:"Informel, Salarié, PME"},
-  {nom:"Banque Atlantique — Yopougon",quartier:"Yopougon",couleur:"#22C55E",profils:"Informel, Commerçant, PME"},
-  {nom:"SGBCI — Plateau",quartier:"Plateau",couleur:GOLD,profils:"Salarié, Fonctionnaire"},
-  {nom:"Ecobank CI — Cocody",quartier:"Cocody",couleur:"#22C55E",profils:"Informel, Salarié, PME"},
-  {nom:"Banque Atlantique — Abobo",quartier:"Abobo",couleur:"#22C55E",profils:"Informel, Commerçant"},
-  {nom:"BICICI — Plateau",quartier:"Plateau",couleur:GOLD,profils:"Salarié, Fonctionnaire"},
-  {nom:"SIB — Marcory",quartier:"Marcory",couleur:"#EAB308",profils:"Salarié, Fonctionnaire"},
-  {nom:"NSIA Banque — Deux Plateaux",quartier:"Deux Plateaux",couleur:"#EAB308",profils:"Salarié, PME"},
-];
-
-const st = {
-  body:{minHeight:"100vh",background:NAVY,color:"#EEF2F7",fontFamily:"'Plus Jakarta Sans',sans-serif"},
-  nav:{position:"fixed",top:0,left:0,right:0,zIndex:200,height:64,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 28px",background:"rgba(4,16,30,0.95)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(201,168,76,0.12)"},
-  logoMark:{width:32,height:32,borderRadius:8,background:`linear-gradient(135deg,#B8922A,${GOLD2})`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Georgia,serif",fontSize:"1.1rem",fontWeight:700,color:NAVY,boxShadow:"0 0 16px rgba(201,168,76,0.3)"},
-  btnGold:{padding:"10px 22px",borderRadius:6,fontSize:"0.78rem",fontWeight:800,background:`linear-gradient(135deg,#B8922A,${GOLD})`,color:NAVY,border:"none",cursor:"pointer",letterSpacing:"0.05em",textTransform:"uppercase",boxShadow:"0 4px 20px rgba(201,168,76,0.3)"},
-  btnOutline:{padding:"10px 22px",borderRadius:6,fontSize:"0.78rem",fontWeight:700,background:"transparent",color:GOLD,border:"1px solid rgba(201,168,76,0.35)",cursor:"pointer"},
-  card:{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:16,padding:22},
-  inp:{width:"100%",background:"rgba(4,16,30,0.8)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,padding:"12px 14px",color:"#fff",fontFamily:"inherit",fontSize:"0.9rem",fontWeight:600,outline:"none"},
-  lbl:{display:"block",fontSize:"0.67rem",fontWeight:700,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:6},
-  pill:{padding:"8px 16px",borderRadius:30,border:"1.5px solid rgba(255,255,255,0.1)",color:"#6A8DAA",fontSize:"0.78rem",fontWeight:700,cursor:"pointer",background:"transparent"},
-  pillOn:{padding:"8px 16px",borderRadius:30,border:`1.5px solid ${GOLD}`,background:"rgba(201,168,76,0.1)",color:GOLD,fontSize:"0.78rem",fontWeight:700,cursor:"pointer"},
-  sTitle:{fontFamily:"Georgia,serif",fontSize:"clamp(1.8rem,3.5vw,2.6rem)",fontWeight:700,lineHeight:1.1,marginBottom:12},
-  eyebrow:{display:"flex",alignItems:"center",gap:10,marginBottom:12},
-  eyeLine:{width:22,height:1,background:GOLD},
-  eyeTxt:{fontSize:"0.67rem",fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",color:GOLD},
-};
-
-export default function App() {
-  const [page, setPage] = useState("home");
-  const [profil, setProfil] = useState("salarie");
-  const [duree, setDuree] = useState(null);
-  const [simRes, setSimRes] = useState(null);
-  const [checklist, setChecklist] = useState({});
-  const [dashTab, setDashTab] = useState("apercu");
-  const [suiviCode, setSuiviCode] = useState("");
-  const [suiviRes, setSuiviRes] = useState(null);
-  const canvasRef = useRef(null);
-  const sigDrawing = useRef(false);
-  const sigHas = useRef(false);
-  const lastPos = useRef({x:0,y:0});
-
-  const scroll = id => { setPage("home"); setTimeout(()=>{ document.getElementById(id)?.scrollIntoView({behavior:"smooth"}); },80); };
-
-  // Calcul revenu informel
-  const calcRevInformel = () => {
-    const j = parseFloat(document.getElementById("rev-jour")?.value)||0;
-    const h = parseFloat(document.getElementById("rev-hebdo")?.value)||0;
-    const m = parseFloat(document.getElementById("rev-mens-inf")?.value)||0;
-    return j*22 + h*4.3 + m;
-  };
-
-  const analyser = () => {
-    let rev = 0;
-    if(profil === "informel") {
-      rev = calcRevInformel();
-      if(!rev) return alert("⚠️ Entre au moins un revenu (journalier, hebdomadaire ou mensuel).");
-    } else {
-      rev = parseFloat(document.getElementById("rev-fixe")?.value)||0;
-      if(!rev) return alert("⚠️ Entre ton revenu mensuel net.");
-    }
-    const dep = parseFloat(document.getElementById("sim-dep")?.value)||0;
-    const mont = parseFloat(document.getElementById("sim-mont")?.value)||0;
-    if(!mont||!duree) return alert("⚠️ Entre le montant et sélectionne une durée.");
-    const mens = getMens(mont,duree,0.12);
-    const total = mens*duree;
-    const reste = rev-dep-mens;
-    const tx = (mens/rev)*100;
-    setSimRes({rev,dep,mont,duree,mens,total,int:total-mont,reste,tx,profil});
-  };
-
-  useEffect(()=>{
-    if(page==="engagement"&&canvasRef.current){
-      const c=canvasRef.current; const dpr=window.devicePixelRatio||1;
-      c.width=c.offsetWidth*dpr; c.height=130*dpr;
-      const ctx=c.getContext("2d"); ctx.scale(dpr,dpr);
-      ctx.strokeStyle=GOLD; ctx.lineWidth=2.5; ctx.lineCap="round"; ctx.lineJoin="round";
-      const gp=e=>{ const r=c.getBoundingClientRect(); const src=e.touches?e.touches[0]:e; return{x:src.clientX-r.left,y:src.clientY-r.top}; };
-      const draw=p=>{ ctx.beginPath(); ctx.moveTo(lastPos.current.x,lastPos.current.y); ctx.lineTo(p.x,p.y); ctx.stroke(); lastPos.current=p; sigHas.current=true; };
-      c.onmousedown=e=>{sigDrawing.current=true;lastPos.current=gp(e);};
-      c.onmousemove=e=>{if(sigDrawing.current)draw(gp(e));};
-      c.onmouseup=c.onmouseleave=()=>sigDrawing.current=false;
-      c.ontouchstart=e=>{e.preventDefault();sigDrawing.current=true;lastPos.current=gp(e);};
-      c.ontouchmove=e=>{e.preventDefault();if(sigDrawing.current)draw(gp(e));};
-      c.ontouchend=()=>sigDrawing.current=false;
-    }
-  },[page]);
-
-  const clearSig=()=>{ const c=canvasRef.current; if(c){c.getContext("2d").clearRect(0,0,c.width,c.height); sigHas.current=false;} };
-
-  const submitEng = async () => {
-    const nom=document.getElementById("eg-nom")?.value?.trim();
-    const tel=document.getElementById("eg-tel")?.value?.trim();
-    const qrt=document.getElementById("eg-quartier")?.value?.trim();
-    const pro=document.getElementById("eg-profession")?.value?.trim();
-    const prj=document.getElementById("eg-projet")?.value?.trim();
-    if(!nom||!tel||!qrt||!pro||!prj) return alert("⚠️ Remplis tous les champs.");
-    if(!document.getElementById("cb1")?.checked||!document.getElementById("cb2")?.checked||!document.getElementById("cb3")?.checked) return alert("⚠️ Accepte les 3 clauses.");
-    if(!sigHas.current) return alert("⚠️ Signe d'abord.");
-    const num="CP-2026-"+String(Math.floor(Math.random()*9000)+1000);
-    try { await fetch("https://formspree.io/f/mykdaqay",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({"Numéro":num,"Nom":nom,"Téléphone":tel,"Quartier":qrt,"Profession":pro,"Projet":prj,"Montant":simRes?fmt(simRes.mont):"—","Durée":simRes?simRes.duree+" mois":"—","Revenu mensuel":simRes?fmt(simRes.rev):"—","Profil":profil})}); } catch(e){}
-    window._dossierNum=num; setPage("confirmation");
-  };
-
-  if(page==="dashboard") return <Dashboard dashTab={dashTab} setDashTab={setDashTab} setPage={setPage}/>;
-  if(page==="suivi") return <Suivi suiviCode={suiviCode} setSuiviCode={setSuiviCode} suiviRes={suiviRes} setSuiviRes={setSuiviRes} setPage={setPage}/>;
-  if(page==="engagement") return <Engagement canvasRef={canvasRef} clearSig={clearSig} submitEng={submitEng} setPage={setPage} simRes={simRes}/>;
-  if(page==="confirmation") return <Confirmation setPage={setPage}/>;
-
-  return (
-    <div style={st.body}>
-      {/* NAV */}
-      <nav style={st.nav}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={st.logoMark}>C</div>
-          <div>
-            <div style={{fontFamily:"Georgia,serif",fontSize:"1.1rem",fontWeight:700}}><span style={{color:GOLD}}>Crédit</span>Pro CI</div>
-            <div style={{fontSize:"0.55rem",fontWeight:600,color:"#6A8DAA",letterSpacing:"0.1em",textTransform:"uppercase"}}>Courtage Bancaire</div>
-          </div>
-        </div>
-        <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-          {[["simulateur","Simuler"],["checklist","Documents"],["temoignages","Témoignages"],["actualites","Actualités"],["agences","Agences"]].map(([id,label])=>(
-            <button key={id} onClick={()=>scroll(id)} style={{background:"none",border:"none",color:"#6A8DAA",fontSize:"0.72rem",fontWeight:600,cursor:"pointer",letterSpacing:"0.04em",textTransform:"uppercase"}}>{label}</button>
-          ))}
-          <button onClick={()=>setPage("suivi")} style={{...st.btnOutline,padding:"7px 14px",fontSize:"0.7rem"}}>Suivi</button>
-          <button onClick={()=>setPage("dashboard")} style={{...st.btnGold,padding:"7px 14px",fontSize:"0.7rem"}}>Dashboard</button>
-        </div>
-      </nav>
-
-      {/* HERO */}
-      <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",padding:"100px 28px 60px",background:"radial-gradient(ellipse 80% 50% at 50% 0%,rgba(201,168,76,0.06),transparent 60%)"}}>
-        <div style={{maxWidth:1000,margin:"0 auto",width:"100%"}}>
-          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Côte d'Ivoire · Courtage Bancaire · 2025</div></div>
-          <h1 style={{fontFamily:"Georgia,serif",fontSize:"clamp(2.6rem,6vw,4.8rem)",fontWeight:700,lineHeight:1.05,letterSpacing:"-0.02em",marginBottom:16}}>
-            L'accès au crédit,<br/>
-            <span style={{color:"transparent",WebkitTextStroke:"1px rgba(201,168,76,0.5)"}}>démocratisé.</span><br/>
-            <span style={{color:GOLD}}>Pour tous les Ivoiriens.</span>
-          </h1>
-          <p style={{color:"#6A8DAA",fontSize:"1rem",lineHeight:1.8,maxWidth:500,marginBottom:36}}>Salarié, fonctionnaire, commerçant ou entrepreneur — je prépare ton dossier, je négocie pour toi et je t'accompagne physiquement en banque.</p>
-          <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:56}}>
-            <button style={st.btnGold} onClick={()=>scroll("simulateur")}>Simuler mon crédit</button>
-            <button style={st.btnOutline} onClick={()=>setPage("suivi")}>Suivre mon dossier →</button>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",border:"1px solid rgba(201,168,76,0.15)",borderRadius:12,overflow:"hidden"}}>
-            {[["32M","Habitants CI 2024"],["11–12M","Travailleurs informels"],["<10%","Informels avec crédit"],["80%","Taux succès visé"]].map(([v,l])=>(
-              <div key={l} style={{padding:"22px 14px",textAlign:"center",borderRight:"1px solid rgba(201,168,76,0.1)",background:"rgba(201,168,76,0.03)"}}>
-                <div style={{fontFamily:"Georgia,serif",fontSize:"1.9rem",fontWeight:700,color:GOLD,marginBottom:5}}>{v}</div>
-                <div style={{fontSize:"0.62rem",fontWeight:700,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.07em",lineHeight:1.4}}>{l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* SIMULATEUR */}
-      <div id="simulateur" style={{padding:"70px 28px",background:"rgba(6,21,37,0.9)"}}>
-        <div style={{maxWidth:800,margin:"0 auto"}}>
-          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Simulation crédit</div></div>
-          <h2 style={{...st.sTitle,marginBottom:28}}>Sache ce que tu peux <span style={{color:GOLD}}>vraiment</span> emprunter</h2>
-          <div style={{...st.card,border:"1px solid rgba(201,168,76,0.2)"}}>
-
-            {/* CHOIX PROFIL */}
-            <label style={st.lbl}>Ton profil</label>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:22}}>
-              {[["salarie","👔","Salarié"],["fonctionnaire","🏛️","Fonctionnaire"],["informel","🛒","Commerçant / Informel"],["pme","🏢","PME / Entrepreneur"]].map(([v,ico,label])=>(
-                <div key={v} onClick={()=>{setProfil(v);setSimRes(null);}} style={{padding:"14px 8px",borderRadius:12,border:`2px solid ${profil===v?GOLD:"rgba(255,255,255,0.08)"}`,background:profil===v?"rgba(201,168,76,0.08)":"transparent",cursor:"pointer",textAlign:"center",transition:"all 0.2s"}}>
-                  <div style={{fontSize:"1.4rem",marginBottom:6}}>{ico}</div>
-                  <div style={{fontSize:"0.72rem",fontWeight:800,color:profil===v?GOLD:"#6A8DAA",lineHeight:1.3}}>{label}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* REVENUS SELON PROFIL */}
-            {profil === "informel" ? (
-              <div style={{background:"rgba(201,168,76,0.05)",border:"1px solid rgba(201,168,76,0.15)",borderRadius:12,padding:18,marginBottom:16}}>
-                <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:4}}>💡 Revenus irréguliers — entre ce que tu gagnes</div>
-                <div style={{fontSize:"0.75rem",color:"#6A8DAA",marginBottom:16,lineHeight:1.6}}>Tu n'as pas besoin d'un revenu fixe. Entre ce que tu gagnes en moyenne. On calculera ton revenu mensuel estimé automatiquement.</div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
-                  <div>
-                    <label style={st.lbl}>Par jour ☀️ <span style={{fontSize:"0.6rem",color:"#4A6A85",textTransform:"none"}}>× 22 jours</span></label>
-                    <input id="rev-jour" type="number" style={st.inp} placeholder="5 000" onChange={()=>{
-                      const j=parseFloat(document.getElementById("rev-jour")?.value)||0;
-                      const h=parseFloat(document.getElementById("rev-hebdo")?.value)||0;
-                      const m=parseFloat(document.getElementById("rev-mens-inf")?.value)||0;
-                      const t=j*22+h*4.3+m;
-                      const el=document.getElementById("rev-estime");
-                      if(el) el.textContent=t>0?fmt(t):"—";
-                    }}/>
-                  </div>
-                  <div>
-                    <label style={st.lbl}>Par semaine 📅 <span style={{fontSize:"0.6rem",color:"#4A6A85",textTransform:"none"}}>× 4.3</span></label>
-                    <input id="rev-hebdo" type="number" style={st.inp} placeholder="30 000" onChange={()=>{
-                      const j=parseFloat(document.getElementById("rev-jour")?.value)||0;
-                      const h=parseFloat(document.getElementById("rev-hebdo")?.value)||0;
-                      const m=parseFloat(document.getElementById("rev-mens-inf")?.value)||0;
-                      const t=j*22+h*4.3+m;
-                      const el=document.getElementById("rev-estime");
-                      if(el) el.textContent=t>0?fmt(t):"—";
-                    }}/>
-                  </div>
-                  <div>
-                    <label style={st.lbl}>Par mois 📆 <span style={{fontSize:"0.6rem",color:"#4A6A85",textTransform:"none"}}>fixe</span></label>
-                    <input id="rev-mens-inf" type="number" style={st.inp} placeholder="120 000" onChange={()=>{
-                      const j=parseFloat(document.getElementById("rev-jour")?.value)||0;
-                      const h=parseFloat(document.getElementById("rev-hebdo")?.value)||0;
-                      const m=parseFloat(document.getElementById("rev-mens-inf")?.value)||0;
-                      const t=j*22+h*4.3+m;
-                      const el=document.getElementById("rev-estime");
-                      if(el) el.textContent=t>0?fmt(t):"—";
-                    }}/>
-                  </div>
-                </div>
-                <div style={{marginTop:12,display:"flex",alignItems:"center",gap:8,background:"rgba(34,197,94,0.07)",borderRadius:8,padding:"10px 14px"}}>
-                  <span style={{fontSize:"0.78rem",color:"#6A8DAA"}}>Revenu mensuel estimé :</span>
-                  <span id="rev-estime" style={{fontWeight:800,color:"#22C55E",fontSize:"0.88rem"}}>—</span>
-                </div>
-              </div>
-            ) : (
-              <div style={{marginBottom:16}}>
-                <label style={st.lbl}>Revenu mensuel net {profil==="pme"?"(chiffre d'affaires moyen)":""}</label>
-                <input id="rev-fixe" type="number" style={st.inp} placeholder={profil==="fonctionnaire"?"250 000":profil==="pme"?"800 000":"200 000"}/>
-              </div>
-            )}
-
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:16}}>
-              <div>
-                <label style={st.lbl}>Dépenses mensuelles</label>
-                <input id="sim-dep" type="number" style={st.inp} placeholder="80 000"/>
-              </div>
-              <div>
-                <label style={st.lbl}>Montant souhaité</label>
-                <input id="sim-mont" type="number" style={st.inp} placeholder="500 000"/>
-              </div>
-            </div>
-
-            <div style={{marginBottom:18}}>
-              <label style={st.lbl}>Durée de remboursement</label>
-              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                {[6,12,24,36].map(d=>(
-                  <button key={d} onClick={()=>setDuree(d)} style={duree===d?st.pillOn:st.pill}>{d} mois</button>
-                ))}
-              </div>
-            </div>
-
-            <button style={{...st.btnGold,width:"100%",padding:14,fontSize:"0.88rem"}} onClick={analyser}>🔍 Analyser mon dossier</button>
-
-            {simRes && <SimResults res={simRes} setPage={setPage}/>}
-          </div>
-        </div>
-      </div>
-
-      {/* CHECKLIST */}
-      <div id="checklist" style={{padding:"70px 28px"}}>
-        <div style={{maxWidth:1000,margin:"0 auto"}}>
-          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Prépare ton dossier</div></div>
-          <h2 style={{...st.sTitle,marginBottom:8}}>Checklist <span style={{color:GOLD}}>documents</span></h2>
-          <p style={{color:"#6A8DAA",marginBottom:24,fontSize:"0.88rem"}}>Coche les documents que tu as déjà. Quand tout est coché, ton dossier est prêt.</p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-            {Object.entries(DOCS).map(([type,docs])=>{
-              const labels={salarie:"👔 Salarié",fonctionnaire:"🏛️ Fonctionnaire",informel:"🛒 Commerçant / Informel",pme:"🏢 PME / Entrepreneur"};
-              const done=docs.filter((_,i)=>checklist[type+i]).length;
-              return (
-                <div key={type} style={st.card}>
-                  <div style={{fontSize:"0.72rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:14}}>{labels[type]}</div>
-                  {docs.map((d,i)=>{
-                    const k=type+i;
-                    return (
-                      <div key={k} onClick={()=>setChecklist(p=>({...p,[k]:!p[k]}))} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.04)",cursor:"pointer"}}>
-                        <div style={{width:18,height:18,minWidth:18,borderRadius:4,border:`1.5px solid ${checklist[k]?"#22C55E":"rgba(255,255,255,0.15)"}`,background:checklist[k]?"rgba(34,197,94,0.15)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.7rem",color:"#22C55E",flexShrink:0}}>{checklist[k]?"✓":""}</div>
-                        <span style={{fontSize:"0.78rem",color:checklist[k]?"#22C55E":"#EEF2F7",textDecoration:checklist[k]?"line-through":"none"}}>{d}</span>
-                      </div>
-                    );
-                  })}
-                  <div style={{marginTop:12,background:"rgba(34,197,94,0.06)",borderRadius:8,padding:"8px 12px",fontSize:"0.73rem",color:"#6A8DAA"}}>
-                    ✅ <strong style={{color:"#22C55E"}}>{done}/{docs.length}</strong> documents prêts {done===docs.length&&done>0?"🎉 Dossier complet !":""}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* TÉMOIGNAGES */}
-      <div id="temoignages" style={{padding:"70px 28px",background:"rgba(6,21,37,0.9)"}}>
-        <div style={{maxWidth:1000,margin:"0 auto"}}>
-          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Ils ont obtenu leur crédit</div></div>
-          <h2 style={{...st.sTitle,marginBottom:28}}>Ce que disent <span style={{color:GOLD}}>nos clients</span></h2>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
-            {TEMOIGNAGES.map((t,i)=>(
-              <div key={i} style={{...st.card,borderColor:"rgba(201,168,76,0.15)"}}>
-                <div style={{marginBottom:12}}>{"⭐".repeat(t.note)}</div>
-                <p style={{fontSize:"0.84rem",lineHeight:1.7,color:"#EEF2F7",marginBottom:16,fontStyle:"italic"}}>"{t.texte}"</p>
-                <div style={{borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:12}}>
-                  <div style={{fontWeight:800,fontSize:"0.86rem"}}>{t.nom}</div>
-                  <div style={{fontSize:"0.7rem",color:"#6A8DAA",marginTop:2}}>{t.profil} · {t.quartier}</div>
-                  <div style={{marginTop:8,display:"flex",gap:6}}>
-                    <span style={{fontSize:"0.65rem",padding:"2px 8px",borderRadius:5,background:"rgba(34,197,94,0.1)",color:"#22C55E",fontWeight:800}}>{t.montant}</span>
-                    <span style={{fontSize:"0.65rem",padding:"2px 8px",borderRadius:5,background:"rgba(201,168,76,0.1)",color:GOLD,fontWeight:800}}>{t.duree}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p style={{textAlign:"center",marginTop:16,fontSize:"0.7rem",color:"#4A6A85",fontStyle:"italic"}}>* Témoignages illustratifs — à remplacer par tes vrais clients</p>
-        </div>
-      </div>
-
-      {/* ACTUALITÉS */}
-      <div id="actualites" style={{padding:"70px 28px"}}>
-        <div style={{maxWidth:1000,margin:"0 auto"}}>
-          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Actualités financières CI</div></div>
-          <h2 style={{...st.sTitle,marginBottom:28}}>Rester <span style={{color:GOLD}}>informé</span></h2>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
-            {ACTU.map((a,i)=>(
-              <div key={i} style={{...st.card,cursor:"pointer"}}>
-                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                  <span style={{fontSize:"0.62rem",padding:"3px 10px",borderRadius:20,background:"rgba(201,168,76,0.1)",color:GOLD,fontWeight:800,textTransform:"uppercase"}}>{a.tag}</span>
-                  <span style={{fontSize:"0.66rem",color:"#6A8DAA"}}>{a.date}</span>
-                </div>
-                <h4 style={{fontSize:"0.88rem",fontWeight:800,lineHeight:1.4,marginBottom:8}}>{a.titre}</h4>
-                <p style={{fontSize:"0.76rem",color:"#6A8DAA",lineHeight:1.65}}>{a.resume}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* AGENCES */}
-      <div id="agences" style={{padding:"70px 28px",background:"rgba(6,21,37,0.9)"}}>
-        <div style={{maxWidth:1000,margin:"0 auto"}}>
-          <div style={st.eyebrow}><div style={st.eyeLine}></div><div style={st.eyeTxt}>Agences partenaires</div></div>
-          <h2 style={{...st.sTitle,marginBottom:8}}>Agences <span style={{color:GOLD}}>bancaires</span> à Abidjan</h2>
-          <p style={{color:"#6A8DAA",marginBottom:24,fontSize:"0.86rem"}}>Tu n'iras jamais seul. Je t'accompagne dans l'agence la plus proche de toi.</p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1.4fr",gap:16,alignItems:"start"}}>
-            <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {AGENCES.map((a,i)=>(
-                <div key={i} style={{...st.card,display:"flex",alignItems:"center",gap:12,padding:"12px 16px"}}>
-                  <div style={{width:9,height:9,borderRadius:"50%",background:a.couleur,boxShadow:`0 0 8px ${a.couleur}`,flexShrink:0}}></div>
-                  <div style={{flex:1}}>
-                    <div style={{fontWeight:800,fontSize:"0.82rem"}}>{a.nom}</div>
-                    <div style={{fontSize:"0.68rem",color:"#6A8DAA",marginTop:1}}>{a.profils}</div>
-                  </div>
-                  <button onClick={()=>window.open(`https://www.google.com/maps/search/${encodeURIComponent(a.nom+" Abidjan")}`)} style={{padding:"4px 10px",borderRadius:6,background:"rgba(201,168,76,0.1)",border:"1px solid rgba(201,168,76,0.2)",color:GOLD,fontSize:"0.65rem",fontWeight:800,cursor:"pointer"}}>Voir →</button>
-                </div>
-              ))}
-            </div>
-            <div style={{...st.card,background:"rgba(201,168,76,0.04)",border:"1px solid rgba(201,168,76,0.2)",padding:26}}>
-              <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:16}}>Quelle banque selon ton profil ?</div>
-              {[{p:"👔 Salarié / Fonctionnaire",b:"SGBCI, BICICI, SIB",c:"rgba(201,168,76,0.08)"},{p:"🛒 Commerçant / Informel",b:"Ecobank CI, Banque Atlantique",c:"rgba(34,197,94,0.06)"},{p:"🏢 PME / Entrepreneur",b:"Banque Atlantique, NSIA, BNI + FGCI",c:"rgba(30,144,255,0.06)"}].map((r,i)=>(
-                <div key={i} style={{background:r.c,borderRadius:10,padding:"12px 14px",marginBottom:8}}>
-                  <div style={{fontWeight:800,fontSize:"0.82rem",marginBottom:3}}>{r.p}</div>
-                  <div style={{fontSize:"0.75rem",color:"#6A8DAA"}}>{r.b}</div>
-                </div>
-              ))}
-              <div style={{marginTop:14,padding:"12px 14px",background:"rgba(37,211,102,0.06)",border:"1px solid rgba(37,211,102,0.15)",borderRadius:10,fontSize:"0.78rem",lineHeight:1.6}}>
-                💬 <strong style={{color:"#25D366"}}>Tu hésites ?</strong> Contacte-moi sur WhatsApp — je t'oriente vers la bonne agence.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* FOOTER */}
-      <footer style={{padding:"36px 28px",borderTop:"1px solid rgba(255,255,255,0.05)",textAlign:"center"}}>
-        <div style={{fontFamily:"Georgia,serif",fontSize:"1.1rem",fontWeight:700,marginBottom:8}}><span style={{color:GOLD}}>Crédit</span>Pro CI</div>
-        <p style={{fontSize:"0.7rem",color:"#4A6A85",lineHeight:1.7}}>Service de courtage bancaire · Abidjan, Côte d'Ivoire · 2025<br/>Taux indicatifs — consultez votre conseiller avant toute décision.</p>
-      </footer>
-
-      {/* WHATSAPP */}
-      <div onClick={()=>window.open("https://wa.me/2250700000000?text=Bonjour%20CréditPro%20CI,%20je%20voudrais%20des%20informations.")} style={{position:"fixed",bottom:24,right:24,zIndex:300,width:54,height:54,borderRadius:"50%",background:"#25D366",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(37,211,102,0.4)",cursor:"pointer",fontSize:"1.5rem"}}>💬</div>
-    </div>
-  );
-}
-
-function SimResults({res, setPage}) {
-  const {mens,total,int:interet,reste,tx,profil,mont,duree} = res;
-  const clr = tx<30&&reste>0?"#22C55E":tx<40&&reste>0?"#EAB308":"#EF4444";
-  const banquesFiltrees = BANKS.filter(b=>b.profiles.includes(profil));
-  return (
-    <div style={{marginTop:22,paddingTop:22,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:14}}>
-        {[[fmt(mens),"Mensualité",GOLD],[fmt(reste),"Reste / mois",reste>0?"#22C55E":"#EF4444"],[fmt(total),"Total remboursé","#fff"],[fmt(interet),"Intérêts",GOLD],[pct(tx),"Taux endettement",clr],[tx<30?"Faible ✅":tx<40?"Moyen ⚠️":"Élevé 🚫","Niveau risque",clr]].map(([v,l,c])=>(
-          <div key={l} style={{background:"rgba(4,16,30,0.8)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"12px 10px",textAlign:"center"}}>
-            <div style={{fontFamily:"Georgia,serif",fontSize:"1.1rem",fontWeight:700,color:c,marginBottom:3}}>{v}</div>
-            <div style={{fontSize:"0.6rem",fontWeight:700,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.05em"}}>{l}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Verdict */}
-      <div style={{padding:"14px 16px",borderRadius:10,border:`1px solid ${clr}33`,background:`${clr}0A`,display:"flex",gap:12,alignItems:"center",marginBottom:14}}>
-        <span style={{fontSize:"1.6rem"}}>{tx<30&&reste>0?"✅":tx<40&&reste>0?"⚠️":"🚫"}</span>
+    <!-- NAVIGATION -->
+    <nav class="main-nav">
+      <div class="nav-logo">
+        <div class="logo-mark">C</div>
         <div>
-          <div style={{fontWeight:800,color:clr,fontSize:"0.92rem",marginBottom:3}}>{tx<30&&reste>0?"Dossier Finançable":tx<40&&reste>0?"Dossier à Optimiser":reste<=0?"Dossier Non Finançable":"Dossier Très Risqué"}</div>
-          <div style={{fontSize:"0.75rem",color:"#6A8DAA"}}>{tx<30&&reste>0?"Ton profil est solide. Je peux défendre ce dossier auprès de nos banques partenaires.":tx<40&&reste>0?"Possible mais limite. On va renforcer quelques points du dossier ensemble.":"Trop risqué. Réduisons le montant ou allongeons la durée."}</div>
+          <div class="logo-text-main"><span class="gold">Crédit</span>Pro CI</div>
+          <div class="logo-text-sub">Courtage Bancaire</div>
         </div>
       </div>
-
-      {/* Jauge */}
-      <div style={{marginBottom:16}}>
-        <div style={{display:"flex",justifyContent:"space-between",fontSize:"0.72rem",fontWeight:700,marginBottom:5}}><span>Taux d'endettement</span><span style={{color:clr}}>{pct(tx)}</span></div>
-        <div style={{height:9,background:"rgba(255,255,255,0.05)",borderRadius:5,overflow:"hidden"}}>
-          <div style={{height:"100%",width:`${Math.min(tx,100)}%`,background:clr,borderRadius:5,transition:"width 1s"}}></div>
-        </div>
-        <div style={{display:"flex",justifyContent:"space-between",fontSize:"0.6rem",color:"#6A8DAA",marginTop:3}}><span>✅ &lt;30%</span><span>⚠️ 30–40%</span><span>🚫 &gt;40%</span></div>
+      <div class="nav-links">
+        <button class="nav-link" onclick="scrollToSection('simulateur')">Simuler</button>
+        <button class="nav-link" onclick="scrollToSection('checklist')">Documents</button>
+        <button class="nav-link" onclick="scrollToSection('temoignages')">Témoignages</button>
+        <button class="nav-link" onclick="scrollToSection('actualites')">Actualités</button>
+        <button class="nav-link" onclick="scrollToSection('agences')">Agences</button>
+        <button class="btn-outline btn-sm" onclick="setPage('suivi')">Suivi</button>
+        <button class="btn-gold btn-sm" onclick="setPage('dashboard')">Dashboard</button>
       </div>
+    </nav>
 
-      {/* Banques filtrées selon profil */}
-      <div style={{marginBottom:14}}>
-        <div style={{fontSize:"0.63rem",fontWeight:800,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Banques recommandées pour ton profil</div>
-        {banquesFiltrees.map((b,i)=>{
-          const m=getMens(mont,duree,b.t/100);
-          const tc={best:"#22C55E",mid:"#EAB308",high:"#EF4444"}[b.tag];
-          return (
-            <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.04)",flexWrap:"wrap"}}>
-              <div style={{flex:1,minWidth:130}}>
-                <div style={{fontWeight:700,fontSize:"0.8rem"}}>🏦 {b.n}</div>
-                <div style={{fontSize:"0.63rem",color:"#6A8DAA",marginTop:1}}>{b.q}</div>
+    <!-- HERO -->
+    <section id="hero">
+      <div class="hero-inner">
+        <div class="eyebrow">
+          <div class="eye-line"></div>
+          <div class="eye-txt">Côte d'Ivoire · Courtage Bancaire · 2025</div>
+        </div>
+        <h1 class="hero-title">
+          L'accès au crédit,<br />
+          <span class="hero-outline">démocratisé.</span><br />
+          <span class="gold">Pour tous les Ivoiriens.</span>
+        </h1>
+        <p class="hero-desc">Salarié, fonctionnaire, commerçant ou entrepreneur — je prépare ton dossier, je négocie pour toi et je t'accompagne physiquement en banque.</p>
+        <div class="hero-btns">
+          <button class="btn-gold" onclick="scrollToSection('simulateur')">Simuler mon crédit</button>
+          <button class="btn-outline" onclick="setPage('suivi')">Suivre mon dossier →</button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-val">32M</div>
+            <div class="hero-stat-lbl">Habitants CI 2024</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val">11–12M</div>
+            <div class="hero-stat-lbl">Travailleurs informels</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val">&lt;10%</div>
+            <div class="hero-stat-lbl">Informels avec crédit</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val">80%</div>
+            <div class="hero-stat-lbl">Taux succès visé</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIMULATEUR -->
+    <section id="simulateur" class="section-wrap alt-bg">
+      <div class="section-inner-sm">
+        <div class="eyebrow">
+          <div class="eye-line"></div>
+          <div class="eye-txt">Simulation crédit</div>
+        </div>
+        <h2 class="section-title mb-28">Sache ce que tu peux <span class="gold">vraiment</span> emprunter</h2>
+
+        <div class="card card-gold">
+          <!-- PROFIL -->
+          <label class="lbl">Ton profil</label>
+          <div class="profil-grid">
+            <div class="profil-card active" data-profil="salarie" onclick="selectProfil('salarie')">
+              <div class="profil-ico">👔</div>
+              <div class="profil-lbl">Salarié</div>
+            </div>
+            <div class="profil-card" data-profil="fonctionnaire" onclick="selectProfil('fonctionnaire')">
+              <div class="profil-ico">🏛️</div>
+              <div class="profil-lbl">Fonctionnaire</div>
+            </div>
+            <div class="profil-card" data-profil="informel" onclick="selectProfil('informel')">
+              <div class="profil-ico">🛒</div>
+              <div class="profil-lbl">Commerçant / Informel</div>
+            </div>
+            <div class="profil-card" data-profil="pme" onclick="selectProfil('pme')">
+              <div class="profil-ico">🏢</div>
+              <div class="profil-lbl">PME / Entrepreneur</div>
+            </div>
+          </div>
+
+          <!-- REVENUS INFORMEL -->
+          <div id="rev-informel-block" class="rev-informel-box" style="display:none">
+            <div class="rev-informel-title">💡 Revenus irréguliers — entre ce que tu gagnes</div>
+            <div class="rev-informel-desc">Tu n'as pas besoin d'un revenu fixe. Entre ce que tu gagnes en moyenne. On calculera ton revenu mensuel estimé automatiquement.</div>
+            <div class="rev-grid">
+              <div>
+                <label class="lbl" for="rev-jour">Par jour ☀️ <span style="font-size:0.6rem;color:#4A6A85;text-transform:none">× 22 jours</span></label>
+                <input id="rev-jour" type="number" class="inp" placeholder="5 000" oninput="updateRevEstime()" />
               </div>
-              <div style={{fontWeight:800,color:GOLD,fontSize:"0.82rem"}}>{b.t}%</div>
-              <div style={{fontSize:"0.7rem",color:"#6A8DAA",textAlign:"right"}}>{fmt(m)}/mois</div>
-              <span style={{fontSize:"0.58rem",padding:"2px 7px",borderRadius:4,background:`${tc}18`,color:tc,fontWeight:800,textTransform:"uppercase"}}>{b.tag==="best"?"Top":b.tag==="mid"?"Moyen":"Élevé"}</span>
-            </div>
-          );
-        })}
-        <div style={{fontSize:"0.65rem",color:"#4A6A85",fontStyle:"italic",marginTop:6,padding:"7px 10px",background:"rgba(201,168,76,0.04)",borderRadius:6}}>⚠️ Taux indicatifs 2025 — les conditions réelles varient. CréditPro CI négocie les meilleures conditions pour chaque dossier.</div>
-      </div>
-
-      {/* Docs */}
-      <div style={{marginBottom:18}}>
-        <div style={{fontSize:"0.63rem",fontWeight:800,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Documents à préparer — {profil==="informel"?"Commerçant / Informel":profil==="pme"?"PME / Entrepreneur":profil==="fonctionnaire"?"Fonctionnaire":"Salarié"}</div>
-        {DOCS[profil].map((d,i)=>(
-          <div key={i} style={{display:"flex",gap:8,padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,0.04)",fontSize:"0.78rem"}}>{d}</div>
-        ))}
-      </div>
-
-      <button style={{...st.btnGold,width:"100%",padding:13,fontSize:"0.85rem"}} onClick={()=>setPage("engagement")}>🤝 Prendre mon engagement &amp; être accompagné →</button>
-    </div>
-  );
-}
-
-function Engagement({canvasRef, clearSig, submitEng, setPage, simRes}) {
-  return (
-    <div style={{...st.body,paddingTop:30}}>
-      <div style={{maxWidth:720,margin:"0 auto",padding:"36px 22px"}}>
-        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:"#6A8DAA",cursor:"pointer",marginBottom:20,fontSize:"0.8rem"}}>← Retour</button>
-        <h2 style={{...st.sTitle,marginBottom:8}}>Mon <span style={{color:GOLD}}>engagement</span></h2>
-        <p style={{color:"#6A8DAA",marginBottom:24,lineHeight:1.7,fontSize:"0.86rem"}}>En signant, tu acceptes les conditions d'accompagnement. Je m'engage à défendre ton dossier auprès des banques partenaires.</p>
-        <div style={{...st.card,border:"1px solid rgba(201,168,76,0.2)",marginBottom:14}}>
-          <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:14}}>Les 5 clauses d'engagement</div>
-          {["Je fournis des informations exactes et complètes. Toute fausse déclaration annule l'accompagnement.","Je prépare les documents demandés dans les délais convenus avec mon courtier.","Je m'engage à rembourser selon l'échéancier. En cas de difficulté je contacte immédiatement mon courtier.","J'honore les rendez-vous bancaires fixés et me présente avec tous les documents complets.","Les frais de courtage sont réglés uniquement si le crédit est obtenu. Zéro frais si échec."].map((c,i)=>(
-            <div key={i} style={{display:"flex",gap:12,padding:"11px 0",borderBottom:i<4?"1px solid rgba(255,255,255,0.05)":"none"}}>
-              <div style={{width:22,height:22,minWidth:22,borderRadius:"50%",background:`linear-gradient(135deg,#B8922A,${GOLD2})`,color:NAVY,fontSize:"0.7rem",fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{i+1}</div>
-              <span style={{fontSize:"0.82rem",lineHeight:1.6}}>{c}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{...st.card,marginBottom:14}}>
-          <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:14}}>Tes informations personnelles</div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            {[["eg-nom","text","Prénom & Nom","Kouassi Jean-Michel"],["eg-tel","tel","WhatsApp","+225 07 XX XX XX XX"],["eg-quartier","text","Quartier / Commune","Yopougon, Cocody..."],["eg-profession","text","Profession","Commerçant, Agent..."]].map(([id,type,label,ph])=>(
-              <div key={id}><label style={st.lbl}>{label}</label><input id={id} type={type} style={st.inp} placeholder={ph}/></div>
-            ))}
-            <div style={{gridColumn:"1/-1"}}>
-              <label style={st.lbl}>Projet — pourquoi ce crédit ?</label>
-              <textarea id="eg-projet" style={{...st.inp,minHeight:76,resize:"vertical"}} placeholder="Acheter du stock, équipement, financer un projet..."/>
-            </div>
-          </div>
-        </div>
-        <div style={{...st.card,marginBottom:14}}>
-          <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:14}}>Acceptation</div>
-          {[["cb1","Je confirme que toutes mes informations financières sont exactes et correspondent à ma situation réelle."],["cb2","J'accepte les 5 clauses d'engagement et je m'engage à les respecter intégralement."],["cb3","J'autorise CréditPro CI à transmettre mon dossier aux banques partenaires dans le cadre de ma demande."]].map(([id,label],i)=>(
-            <div key={id} style={{display:"flex",gap:12,padding:"11px 0",borderBottom:i<2?"1px solid rgba(255,255,255,0.05)":"none",cursor:"pointer"}} onClick={()=>{const c=document.getElementById(id);if(c)c.checked=!c.checked;}}>
-              <input type="checkbox" id={id} style={{width:18,height:18,minWidth:18,accentColor:GOLD,marginTop:2,cursor:"pointer"}}/>
-              <label htmlFor={id} style={{fontSize:"0.82rem",lineHeight:1.6,cursor:"pointer"}}>{label}</label>
-            </div>
-          ))}
-        </div>
-        <div style={{...st.card,marginBottom:18}}>
-          <div style={{fontSize:"0.68rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:10}}>Signature électronique</div>
-          <p style={{fontSize:"0.75rem",color:"#6A8DAA",marginBottom:10}}>Signe avec ton doigt (mobile) ou ta souris (ordinateur).</p>
-          <div style={{border:"1.5px solid rgba(201,168,76,0.25)",borderRadius:10,overflow:"hidden",background:"rgba(4,16,30,0.9)"}}>
-            <canvas ref={canvasRef} style={{display:"block",width:"100%",height:128,cursor:"crosshair",touchAction:"none"}}/>
-            <div style={{display:"flex",alignItems:"center",padding:"7px 12px",borderTop:"1px solid rgba(255,255,255,0.05)"}}>
-              <span style={{fontSize:"0.68rem",color:"#6A8DAA",flex:1}}>✍️ Dessine ta signature ici</span>
-              <button onClick={clearSig} style={{padding:"4px 10px",borderRadius:5,fontSize:"0.68rem",fontWeight:800,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.2)",color:"#EF4444",cursor:"pointer"}}>Effacer</button>
-            </div>
-          </div>
-        </div>
-        <button style={{...st.btnGold,width:"100%",padding:15,fontSize:"0.92rem"}} onClick={submitEng}>📋 Valider mon engagement &amp; Soumettre mon dossier</button>
-      </div>
-    </div>
-  );
-}
-
-function Confirmation({setPage}) {
-  const num = window._dossierNum||"CP-2026-XXXX";
-  return (
-    <div style={{...st.body,display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:22}}>
-      <div style={{maxWidth:540,width:"100%",textAlign:"center",background:"rgba(34,197,94,0.06)",border:"1.5px solid rgba(34,197,94,0.25)",borderRadius:22,padding:44}}>
-        <div style={{fontSize:"3.2rem",marginBottom:18}}>🎉</div>
-        <h2 style={{fontFamily:"Georgia,serif",fontSize:"1.9rem",fontWeight:700,color:"#22C55E",marginBottom:10}}>Dossier soumis !</h2>
-        <p style={{color:"#6A8DAA",lineHeight:1.7,marginBottom:22,fontSize:"0.88rem"}}>Ton engagement a été enregistré. Je te contacte dans les <strong style={{color:"#22C55E"}}>48 heures</strong> pour confirmer le rendez-vous en banque.</p>
-        <div style={{display:"inline-block",background:"rgba(34,197,94,0.1)",border:"1.5px solid rgba(34,197,94,0.25)",borderRadius:10,padding:"10px 26px",fontFamily:"Georgia,serif",fontSize:"1.1rem",fontWeight:700,color:"#22C55E",letterSpacing:"0.04em",marginBottom:24}}>{num}</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:24}}>
-          {[["Prochaine étape","📞 Appel sous 24h"],["Documents","🪪 CNI · 📱 Mobile Money"],["Rendez-vous","🏦 Jamais seul en banque"]].map(([t,v])=>(
-            <div key={t} style={{background:"rgba(4,16,30,0.6)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:12}}>
-              <div style={{fontSize:"0.6rem",fontWeight:800,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:5}}>{t}</div>
-              <div style={{fontSize:"0.76rem",lineHeight:1.5}}>{v}</div>
-            </div>
-          ))}
-        </div>
-        <button style={st.btnGold} onClick={()=>setPage("home")}>Retour à l'accueil</button>
-      </div>
-    </div>
-  );
-}
-
-function Suivi({suiviCode, setSuiviCode, suiviRes, setSuiviRes, setPage}) {
-  const statuts = {
-    recu:{label:"Dossier reçu ✅",color:"#22C55E",desc:"Ton dossier a été reçu et est en cours d'examen."},
-    en_cours:{label:"En cours d'analyse ⏳",color:"#EAB308",desc:"Analyse en cours. Un rendez-vous banque sera fixé très prochainement."},
-    rdv:{label:"Rendez-vous fixé 📅",color:"#1E90FF",desc:"Ton rendez-vous en banque est confirmé. Prépare tes documents."},
-    accepte:{label:"Crédit accordé 🎉",color:"#22C55E",desc:"Félicitations ! Ton crédit a été accordé."},
-    refuse:{label:"Dossier refusé ❌",color:"#EF4444",desc:"Ton dossier n'a pas été retenu. Contacte-nous pour explorer d'autres options."},
-  };
-  const check = () => {
-    if(suiviCode.trim().toUpperCase()==="CP-2026-TEST") setSuiviRes({nom:"Koné Aminata",statut:"en_cours",banque:"Ecobank CI",date:"15 Mars 2025",montant:"800 000 FCFA"});
-    else alert("Dossier introuvable. Vérifiez votre numéro de dossier.");
-  };
-  const s = suiviRes?statuts[suiviRes.statut]:null;
-  return (
-    <div style={{...st.body,minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:22}}>
-      <div style={{maxWidth:500,width:"100%"}}>
-        <button onClick={()=>setPage("home")} style={{background:"none",border:"none",color:"#6A8DAA",cursor:"pointer",marginBottom:22,fontSize:"0.8rem"}}>← Retour</button>
-        <h2 style={{...st.sTitle,marginBottom:6}}>Suivi de <span style={{color:GOLD}}>dossier</span></h2>
-        <p style={{color:"#6A8DAA",marginBottom:24,fontSize:"0.86rem"}}>Entre ton numéro de dossier reçu après signature.</p>
-        <div style={{...st.card,border:"1px solid rgba(201,168,76,0.2)",marginBottom:14}}>
-          <label style={st.lbl}>Numéro de dossier</label>
-          <div style={{display:"flex",gap:10}}>
-            <input value={suiviCode} onChange={e=>setSuiviCode(e.target.value)} style={{...st.inp,flex:1}} placeholder="CP-2026-XXXX"/>
-            <button style={st.btnGold} onClick={check}>Chercher</button>
-          </div>
-          <p style={{fontSize:"0.65rem",color:"#4A6A85",marginTop:7}}>💡 Test : entre CP-2026-TEST</p>
-        </div>
-        {suiviRes&&s&&(
-          <div style={{...st.card,border:`1px solid ${s.color}33`,background:`${s.color}08`}}>
-            <div style={{fontWeight:800,color:s.color,fontSize:"0.95rem",marginBottom:6}}>{s.label}</div>
-            <div style={{fontSize:"0.78rem",color:"#6A8DAA",marginBottom:16}}>{s.desc}</div>
-            {[["Client",suiviRes.nom],["Banque",suiviRes.banque],["Montant",suiviRes.montant],["Soumis le",suiviRes.date]].map(([l,v])=>(
-              <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.05)",fontSize:"0.8rem"}}>
-                <span style={{color:"#6A8DAA",fontWeight:600}}>{l}</span><span style={{fontWeight:700}}>{v}</span>
+              <div>
+                <label class="lbl" for="rev-hebdo">Par semaine 📅 <span style="font-size:0.6rem;color:#4A6A85;text-transform:none">× 4.3</span></label>
+                <input id="rev-hebdo" type="number" class="inp" placeholder="30 000" oninput="updateRevEstime()" />
               </div>
-            ))}
-            <button style={{...st.btnGold,width:"100%",marginTop:14,padding:11,fontSize:"0.78rem"}} onClick={()=>window.open("https://wa.me/2250700000000")}>📱 Contacter mon courtier sur WhatsApp</button>
+              <div>
+                <label class="lbl" for="rev-mens-inf">Par mois 📆 <span style="font-size:0.6rem;color:#4A6A85;text-transform:none">fixe</span></label>
+                <input id="rev-mens-inf" type="number" class="inp" placeholder="120 000" oninput="updateRevEstime()" />
+              </div>
+            </div>
+            <div class="rev-estime-box">
+              <span class="rev-estime-lbl">Revenu mensuel estimé :</span>
+              <span id="rev-estime">—</span>
+            </div>
           </div>
-        )}
+
+          <!-- REVENUS FIXE -->
+          <div id="rev-fixe-block" class="mb-16">
+            <label class="lbl" id="rev-fixe-label" for="rev-fixe">Revenu mensuel net</label>
+            <input id="rev-fixe" type="number" class="inp" placeholder="200 000" />
+          </div>
+
+          <!-- DÉPENSES & MONTANT -->
+          <div class="sim-row">
+            <div>
+              <label class="lbl" for="sim-dep">Dépenses mensuelles</label>
+              <input id="sim-dep" type="number" class="inp" placeholder="80 000" />
+            </div>
+            <div>
+              <label class="lbl" for="sim-mont">Montant souhaité</label>
+              <input id="sim-mont" type="number" class="inp" placeholder="500 000" />
+            </div>
+          </div>
+
+          <!-- DURÉE -->
+          <div class="sim-margin">
+            <label class="lbl">Durée de remboursement</label>
+            <div class="duree-pills">
+              <button class="pill duree-pill" data-duree="6"  onclick="selectDuree(6)">6 mois</button>
+              <button class="pill duree-pill" data-duree="12" onclick="selectDuree(12)">12 mois</button>
+              <button class="pill duree-pill" data-duree="24" onclick="selectDuree(24)">24 mois</button>
+              <button class="pill duree-pill" data-duree="36" onclick="selectDuree(36)">36 mois</button>
+            </div>
+          </div>
+
+          <button class="btn-gold btn-full" onclick="analyser()">🔍 Analyser mon dossier</button>
+
+          <!-- RÉSULTATS SIMULATION (injecté par JS) -->
+          <div id="sim-results"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHECKLIST -->
+    <section id="checklist" class="section-wrap">
+      <div class="section-inner">
+        <div class="eyebrow">
+          <div class="eye-line"></div>
+          <div class="eye-txt">Prépare ton dossier</div>
+        </div>
+        <h2 class="section-title mb-8">Checklist <span class="gold">documents</span></h2>
+        <p class="muted mb-24" style="font-size:0.88rem">Coche les documents que tu as déjà. Quand tout est coché, ton dossier est prêt.</p>
+        <div class="checklist-grid" id="checklist-content">
+          <!-- Injecté par JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TÉMOIGNAGES -->
+    <section id="temoignages" class="section-wrap alt-bg">
+      <div class="section-inner">
+        <div class="eyebrow">
+          <div class="eye-line"></div>
+          <div class="eye-txt">Ils ont obtenu leur crédit</div>
+        </div>
+        <h2 class="section-title mb-28">Ce que disent <span class="gold">nos clients</span></h2>
+        <div class="temoignages-grid" id="temoignages-content">
+          <!-- Injecté par JS -->
+        </div>
+        <p class="temoignages-note">* Témoignages illustratifs — à remplacer par tes vrais clients</p>
+      </div>
+    </section>
+
+    <!-- ACTUALITÉS -->
+    <section id="actualites" class="section-wrap">
+      <div class="section-inner">
+        <div class="eyebrow">
+          <div class="eye-line"></div>
+          <div class="eye-txt">Actualités financières CI</div>
+        </div>
+        <h2 class="section-title mb-28">Rester <span class="gold">informé</span></h2>
+        <div class="actu-grid" id="actu-content">
+          <!-- Injecté par JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- AGENCES -->
+    <section id="agences" class="section-wrap alt-bg">
+      <div class="section-inner">
+        <div class="eyebrow">
+          <div class="eye-line"></div>
+          <div class="eye-txt">Agences partenaires</div>
+        </div>
+        <h2 class="section-title mb-8">Agences <span class="gold">bancaires</span> à Abidjan</h2>
+        <p class="muted mb-24" style="font-size:0.86rem">Tu n'iras jamais seul. Je t'accompagne dans l'agence la plus proche de toi.</p>
+        <div class="agences-layout">
+          <div class="agences-list" id="agences-content">
+            <!-- Injecté par JS -->
+          </div>
+          <div class="card agences-guide">
+            <div class="guide-title">Quelle banque selon ton profil ?</div>
+            <div class="guide-row" style="background:rgba(201,168,76,0.08)">
+              <div class="guide-row-profil">👔 Salarié / Fonctionnaire</div>
+              <div class="guide-row-banks">SGBCI, BICICI, SIB</div>
+            </div>
+            <div class="guide-row" style="background:rgba(34,197,94,0.06)">
+              <div class="guide-row-profil">🛒 Commerçant / Informel</div>
+              <div class="guide-row-banks">Ecobank CI, Banque Atlantique</div>
+            </div>
+            <div class="guide-row" style="background:rgba(30,144,255,0.06)">
+              <div class="guide-row-profil">🏢 PME / Entrepreneur</div>
+              <div class="guide-row-banks">Banque Atlantique, NSIA, BNI + FGCI</div>
+            </div>
+            <div class="guide-whatsapp">
+              💬 <strong style="color:#25D366">Tu hésites ?</strong> Contacte-moi sur WhatsApp — je t'oriente vers la bonne agence.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-logo"><span class="gold">Crédit</span>Pro CI</div>
+      <p class="footer-text">
+        Service de courtage bancaire · Abidjan, Côte d'Ivoire · 2025<br />
+        Taux indicatifs — consultez votre conseiller avant toute décision.
+      </p>
+    </footer>
+
+  </div><!-- /page-home -->
+
+
+  <!-- ============================================================
+       PAGE : DASHBOARD
+       ============================================================ -->
+  <div class="page" id="page-dashboard">
+    <div class="dashboard-inner">
+      <div class="dash-header">
+        <div>
+          <div class="dash-title font-serif">Tableau de <span class="gold">bord</span></div>
+          <div class="dash-subtitle">CréditPro CI · Mars 2025</div>
+        </div>
+        <button class="btn-outline" onclick="setPage('home')">← Retour au site</button>
+      </div>
+      <div class="dash-tabs">
+        <button class="pill dash-tab active" data-tab="apercu"   onclick="selectDashTab('apercu')">Vue d'ensemble</button>
+        <button class="pill dash-tab"        data-tab="dossiers" onclick="selectDashTab('dossiers')">Dossiers</button>
+        <button class="pill dash-tab"        data-tab="revenus"  onclick="selectDashTab('revenus')">Revenus</button>
+      </div>
+      <div id="dash-content">
+        <!-- Injecté par JS -->
       </div>
     </div>
-  );
-}
+  </div><!-- /page-dashboard -->
 
-function Dashboard({dashTab, setDashTab, setPage}) {
-  const data = {total:47,enCours:12,acceptes:28,refuses:7,revenuMois:560000,revenuTotal:2340000,tauxSucces:80,
-    dossiers:[{nom:"Koné A.",montant:"800K",statut:"accepté",date:"15 Mar",profil:"Commerçant"},{nom:"Kouassi J.",montant:"1.5M",statut:"accepté",date:"12 Mar",profil:"Salarié"},{nom:"Diabaté M.",montant:"500K",statut:"en cours",date:"10 Mar",profil:"Informel"},{nom:"Bamba O.",montant:"300K",statut:"refusé",date:"08 Mar",profil:"Informel"},{nom:"Traoré F.",montant:"1.2M",statut:"en cours",date:"05 Mar",profil:"PME"}]};
-  return (
-    <div style={{...st.body,minHeight:"100vh",padding:"80px 22px 40px"}}>
-      <div style={{maxWidth:960,margin:"0 auto"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap",gap:12}}>
+
+  <!-- ============================================================
+       PAGE : SUIVI
+       ============================================================ -->
+  <div class="page-flex" id="page-suivi">
+    <div class="suivi-inner">
+      <button class="btn-back" onclick="setPage('home')">← Retour</button>
+      <h2 class="section-title mb-6">Suivi de <span class="gold">dossier</span></h2>
+      <p class="muted mb-24" style="font-size:0.86rem">Entre ton numéro de dossier reçu après signature.</p>
+
+      <div class="card card-gold mb-14">
+        <label class="lbl" for="suivi-code">Numéro de dossier</label>
+        <div class="suivi-search">
+          <input id="suivi-code" type="text" class="inp" placeholder="CP-2026-XXXX" style="flex:1" />
+          <button class="btn-gold" onclick="checkSuivi()">Chercher</button>
+        </div>
+        <p class="suivi-hint">💡 Test : entre CP-2026-TEST</p>
+      </div>
+
+      <div id="suivi-result" style="display:none">
+        <!-- Injecté par JS -->
+      </div>
+    </div>
+  </div><!-- /page-suivi -->
+
+
+  <!-- ============================================================
+       PAGE : ENGAGEMENT
+       ============================================================ -->
+  <div class="page" id="page-engagement">
+    <div class="engagement-inner">
+      <button class="btn-back" onclick="setPage('home')">← Retour</button>
+      <h2 class="section-title mb-8">Mon <span class="gold">engagement</span></h2>
+      <p class="muted mb-24" style="line-height:1.7;font-size:0.86rem">En signant, tu acceptes les conditions d'accompagnement. Je m'engage à défendre ton dossier auprès des banques partenaires.</p>
+
+      <!-- LES 5 CLAUSES -->
+      <div class="card card-gold mb-14">
+        <div class="eng-section-title">Les 5 clauses d'engagement</div>
+        <div class="clause-item">
+          <div class="clause-num">1</div>
+          <span class="clause-text">Je fournis des informations exactes et complètes. Toute fausse déclaration annule l'accompagnement.</span>
+        </div>
+        <div class="clause-item">
+          <div class="clause-num">2</div>
+          <span class="clause-text">Je prépare les documents demandés dans les délais convenus avec mon courtier.</span>
+        </div>
+        <div class="clause-item">
+          <div class="clause-num">3</div>
+          <span class="clause-text">Je m'engage à rembourser selon l'échéancier. En cas de difficulté je contacte immédiatement mon courtier.</span>
+        </div>
+        <div class="clause-item">
+          <div class="clause-num">4</div>
+          <span class="clause-text">J'honore les rendez-vous bancaires fixés et me présente avec tous les documents complets.</span>
+        </div>
+        <div class="clause-item" style="border-bottom:none">
+          <div class="clause-num">5</div>
+          <span class="clause-text">Les frais de courtage sont réglés uniquement si le crédit est obtenu. Zéro frais si échec.</span>
+        </div>
+      </div>
+
+      <!-- INFORMATIONS PERSONNELLES -->
+      <div class="card mb-14">
+        <div class="eng-section-title">Tes informations personnelles</div>
+        <div class="eng-form-grid">
           <div>
-            <div style={{fontFamily:"Georgia,serif",fontSize:"1.7rem",fontWeight:700}}>Tableau de <span style={{color:GOLD}}>bord</span></div>
-            <div style={{fontSize:"0.7rem",color:"#6A8DAA",marginTop:2}}>CréditPro CI · Mars 2025</div>
+            <label class="lbl" for="eg-nom">Prénom &amp; Nom</label>
+            <input id="eg-nom" type="text" class="inp" placeholder="Kouassi Jean-Michel" />
           </div>
-          <button onClick={()=>setPage("home")} style={st.btnOutline}>← Retour au site</button>
+          <div>
+            <label class="lbl" for="eg-tel">WhatsApp</label>
+            <input id="eg-tel" type="tel" class="inp" placeholder="+225 07 XX XX XX XX" />
+          </div>
+          <div>
+            <label class="lbl" for="eg-quartier">Quartier / Commune</label>
+            <input id="eg-quartier" type="text" class="inp" placeholder="Yopougon, Cocody..." />
+          </div>
+          <div>
+            <label class="lbl" for="eg-profession">Profession</label>
+            <input id="eg-profession" type="text" class="inp" placeholder="Commerçant, Agent..." />
+          </div>
+          <div class="eng-form-full">
+            <label class="lbl" for="eg-projet">Projet — pourquoi ce crédit ?</label>
+            <textarea id="eg-projet" class="inp" placeholder="Acheter du stock, équipement, financer un projet..."></textarea>
+          </div>
         </div>
-        <div style={{display:"flex",gap:8,marginBottom:22}}>
-          {[["apercu","Vue d'ensemble"],["dossiers","Dossiers"],["revenus","Revenus"]].map(([id,label])=>(
-            <button key={id} onClick={()=>setDashTab(id)} style={dashTab===id?st.pillOn:st.pill}>{label}</button>
-          ))}
-        </div>
-
-        {dashTab==="apercu"&&(
-          <>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:16}}>
-              {[[data.total,"Total","📋",GOLD],[data.enCours,"En cours","⏳","#EAB308"],[data.acceptes,"Acceptés","✅","#22C55E"],[data.refuses,"Refusés","❌","#EF4444"]].map(([v,l,i,c])=>(
-                <div key={l} style={{...st.card,textAlign:"center",padding:18}}>
-                  <div style={{fontSize:"1.3rem",marginBottom:6}}>{i}</div>
-                  <div style={{fontFamily:"Georgia,serif",fontSize:"1.8rem",fontWeight:700,color:c,marginBottom:3}}>{v}</div>
-                  <div style={{fontSize:"0.62rem",fontWeight:700,color:"#6A8DAA",textTransform:"uppercase",letterSpacing:"0.06em"}}>{l}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-              <div style={st.card}>
-                <div style={{fontSize:"0.65rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:12}}>Taux de succès</div>
-                <div style={{fontFamily:"Georgia,serif",fontSize:"2.8rem",fontWeight:700,color:"#22C55E",marginBottom:6}}>{data.tauxSucces}%</div>
-                <div style={{height:7,background:"rgba(255,255,255,0.05)",borderRadius:4,overflow:"hidden",marginBottom:6}}>
-                  <div style={{height:"100%",width:`${data.tauxSucces}%`,background:"#22C55E",borderRadius:4}}></div>
-                </div>
-                <div style={{fontSize:"0.72rem",color:"#6A8DAA"}}>Objectif 75% · <span style={{color:"#22C55E"}}>Dépassé ✅</span></div>
-              </div>
-              <div style={st.card}>
-                <div style={{fontSize:"0.65rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:12}}>Revenu ce mois</div>
-                <div style={{fontFamily:"Georgia,serif",fontSize:"1.8rem",fontWeight:700,color:GOLD,marginBottom:4}}>{fmt(data.revenuMois)}</div>
-                <div style={{fontSize:"0.72rem",color:"#6A8DAA",marginBottom:10}}>Total cumulé : <strong style={{color:"#fff"}}>{fmt(data.revenuTotal)}</strong></div>
-                <div style={{fontSize:"0.7rem",padding:"8px 10px",background:"rgba(201,168,76,0.06)",borderRadius:8,color:"#6A8DAA"}}>Moy. / dossier : <strong style={{color:GOLD}}>~20 000 FCFA</strong></div>
-              </div>
-            </div>
-          </>
-        )}
-
-        {dashTab==="dossiers"&&(
-          <div style={st.card}>
-            <div style={{fontSize:"0.65rem",fontWeight:800,color:GOLD,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:14}}>Derniers dossiers</div>
-            {data.dossiers.map((d,i)=>{
-              const sc={accepté:"#22C55E","en cours":"#EAB308",refusé:"#EF4444"}[d.statut];
-              return (
-                <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 0",borderBottom:i<4?"1px solid rgba(255,255,255,0.05)":"none",flexWrap:"wrap"}}>
-                  <div style={{width:34,height:34,borderRadius:"50%",background:"rgba(201,168,76,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:"0.78rem",color:GOLD,flexShrink:0}}>{d.nom.charAt(0)}</div>
-                  <div style={{flex:1,minWidth:90}}>
-                    <div style={{fontWeight:700,fontSize:"0.83rem"}}>{d.nom}</div>
-                    <div style={{fontSize:"0.67rem",color:"#6A8DAA",marginTop:1}}>{d.profil} · {d.date}</div>
-                  </div>
-                  <div style={{fontWeight:800,color:GOLD,fontSize:"0.85rem"}}>{d.montant} FCFA</div>
-                  <span style={{fontSize:"0.62rem",padding:"2px 9px",borderRadius:20,background:`${sc}18`,color:sc,fontWeight:800,textTransform:"uppercase"}}>{d.statut}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {dashTab==="revenus"&&(
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            {[["Commission banques (0,5%/dossier)","140 000 FCFA","35 dossiers × 4 000 FCFA"],["Frais courtage clients (2%/dossier)","420 000 FCFA","35 dossiers × 12 000 FCFA"],["Forfaits dossiers PME","75 000 FCFA","3 dossiers × 25 000 FCFA"],["Total du mois","635 000 FCFA","Mars 2025 — Données illustratives"]].map(([l,v,d],i)=>(
-              <div key={i} style={{...st.card,borderColor:i===3?"rgba(201,168,76,0.3)":undefined}}>
-                <div style={{fontSize:"0.68rem",fontWeight:700,color:"#6A8DAA",marginBottom:8}}>{l}</div>
-                <div style={{fontFamily:"Georgia,serif",fontSize:"1.6rem",fontWeight:700,color:i===3?GOLD:"#fff",marginBottom:4}}>{v}</div>
-                <div style={{fontSize:"0.7rem",color:"#4A6A85"}}>{d}</div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+
+      <!-- ACCEPTATION -->
+      <div class="card mb-14">
+        <div class="eng-section-title">Acceptation</div>
+        <div class="cb-item" onclick="toggleCb('cb1')">
+          <input type="checkbox" id="cb1" />
+          <label class="cb-label" for="cb1">Je confirme que toutes mes informations financières sont exactes et correspondent à ma situation réelle.</label>
+        </div>
+        <div class="cb-item" onclick="toggleCb('cb2')">
+          <input type="checkbox" id="cb2" />
+          <label class="cb-label" for="cb2">J'accepte les 5 clauses d'engagement et je m'engage à les respecter intégralement.</label>
+        </div>
+        <div class="cb-item" style="border-bottom:none" onclick="toggleCb('cb3')">
+          <input type="checkbox" id="cb3" />
+          <label class="cb-label" for="cb3">J'autorise CréditPro CI à transmettre mon dossier aux banques partenaires dans le cadre de ma demande.</label>
+        </div>
+      </div>
+
+      <!-- SIGNATURE -->
+      <div class="card mb-18">
+        <div class="eng-section-title">Signature électronique</div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:10px">Signe avec ton doigt (mobile) ou ta souris (ordinateur).</p>
+        <div class="canvas-wrap">
+          <canvas id="sig-canvas"></canvas>
+          <div class="canvas-footer">
+            <span class="canvas-hint">✍️ Dessine ta signature ici</span>
+            <button class="btn-clear" onclick="clearSig()">Effacer</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-gold btn-full" style="padding:15px;font-size:0.92rem" onclick="submitEng()">📋 Valider mon engagement &amp; Soumettre mon dossier</button>
     </div>
-  );
-}
+  </div><!-- /page-engagement -->
+
+
+  <!-- ============================================================
+       PAGE : CONFIRMATION
+       ============================================================ -->
+  <div class="page-flex" id="page-confirmation">
+    <div class="confirmation-box">
+      <div class="confirmation-emoji">🎉</div>
+      <h2 class="confirmation-title">Dossier soumis !</h2>
+      <p class="confirmation-desc">
+        Ton engagement a été enregistré. Je te contacte dans les
+        <strong style="color:var(--green)">48 heures</strong> pour confirmer le rendez-vous en banque.
+      </p>
+      <div class="confirmation-num" id="confirmation-num">CP-2026-XXXX</div>
+      <div class="confirmation-grid">
+        <div class="confirmation-step">
+          <div class="confirmation-step-lbl">Prochaine étape</div>
+          <div class="confirmation-step-val">📞 Appel sous 24h</div>
+        </div>
+        <div class="confirmation-step">
+          <div class="confirmation-step-lbl">Documents</div>
+          <div class="confirmation-step-val">🪪 CNI · 📱 Mobile Money</div>
+        </div>
+        <div class="confirmation-step">
+          <div class="confirmation-step-lbl">Rendez-vous</div>
+          <div class="confirmation-step-val">🏦 Jamais seul en banque</div>
+        </div>
+      </div>
+      <button class="btn-gold" onclick="setPage('home')">Retour à l'accueil</button>
+    </div>
+  </div><!-- /page-confirmation -->
+
+
+  <!-- ============================================================
+       BOUTON WHATSAPP (fixe)
+       ============================================================ -->
+  <div class="whatsapp-btn" onclick="openWhatsApp()" title="Contacter sur WhatsApp">💬</div>
+
+  <!-- JavaScript applicatif -->
+  <script src="app.js"></script>
+
+</body>
+</html>
